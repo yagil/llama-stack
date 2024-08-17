@@ -17,8 +17,7 @@ from .datatypes import *  # noqa: F403
 class CreateDatasetRequest(BaseModel):
     """Request to create a dataset."""
 
-    uuid: str
-    dataset: TrainEvalDataset
+    dataset: TrainDataset | EvalDataset
 
 
 class Datasets(Protocol):
@@ -26,13 +25,13 @@ class Datasets(Protocol):
     def create_dataset(
         self,
         request: CreateDatasetRequest,
-    ) -> None: ...
+    ) -> str: ...
 
     @webmethod(route="/datasets/get")
     def get_dataset(
         self,
         dataset_uuid: str,
-    ) -> TrainEvalDataset: ...
+    ) -> TrainDataset | EvalDataset: ...
 
     @webmethod(route="/datasets/delete")
     def delete_dataset(

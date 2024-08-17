@@ -16,39 +16,27 @@ from llama_toolchain.dataset.api.datatypes import *  # noqa: F403
 from llama_toolchain.common.training_types import *  # noqa: F403
 
 
-class EvaluateTaskRequestCommon(BaseModel):
-    job_uuid: str
-    dataset: TrainEvalDataset
-
-    checkpoint: Checkpoint
-
-    # generation params
-    sampling_params: SamplingParams = SamplingParams()
-
 
 @json_schema_type
-class EvaluateTextGenerationRequest(EvaluateTaskRequestCommon):
-    """Request to evaluate text generation."""
+class EvalCreateRequest(BaseModel):
+    candidate: ModelCandidate | AgentCandidate
+    tasks: List[Task]
 
-    metrics: List[TextGenerationMetric]
 
+# where do the generations go?
+@json_schema_type
+class EvalGenerationsRequest(BaseModel):
+    candidate: ModelCandidate | AgentCandidate
+    tasks: List[Task]
 
 @json_schema_type
-class EvaluateQuestionAnsweringRequest(EvaluateTaskRequestCommon):
-    """Request to evaluate question answering."""
-
-    metrics: List[QuestionAnsweringMetric]
-
+class EvalScoringRequest(BaseModel):
+    candidate: ModelCandidate | AgentCandidate
+    tasks: List[Task]
 
 @json_schema_type
-class EvaluateSummarizationRequest(EvaluateTaskRequestCommon):
-    """Request to evaluate summarization."""
-
-    metrics: List[SummarizationMetric]
-
-
-class EvaluationJobStatusResponse(BaseModel):
-    job_uuid: str
+class EvalCreateResponse(BaseModel):
+    job_id: str
 
 
 @json_schema_type
@@ -59,28 +47,19 @@ class EvaluationJobArtifactsResponse(BaseModel):
 
 
 class Evaluations(Protocol):
-    @webmethod(route="/evaluate/text_generation/")
-    def evaluate_text_generation(
-        self,
-        request: EvaluateTextGenerationRequest,
-    ) -> EvaluationJob: ...
+    @webmethod(route="/evals/supported_tasks", method="GET")
+    def supported_tasks(self) -> List[str]: ...
 
-    @webmethod(route="/evaluate/question_answering/")
-    def evaluate_question_answering(
+    @webmethod(route="/evals/create")
+    def create_evaluation_job(
         self,
-        request: EvaluateQuestionAnsweringRequest,
-    ) -> EvaluationJob: ...
-
-    @webmethod(route="/evaluate/summarization/")
-    def evaluate_summarization(
-        self,
-        request: EvaluateSummarizationRequest,
-    ) -> EvaluationJob: ...
+        request: EvalCreateRequest,
+    ) -> EvalCreateResponse: ...
 
     @webmethod(route="/evaluate/jobs")
     def get_evaluation_jobs(self) -> List[EvaluationJob]: ...
 
-    @webmethod(route="/evaluate/job/status")
+    @webmethod(route="/evals/job/status", method="GET")
     def get_evaluation_job_status(
         self, job_uuid: str
     ) -> EvaluationJobStatusResponse: ...
@@ -89,7 +68,7 @@ class Evaluations(Protocol):
     @webmethod(route="/evaluate/job/logs")
     def get_evaluation_job_logstream(self, job_uuid: str) -> EvaluationJobLogStream: ...
 
-    @webmethod(route="/evaluate/job/cancel")
+    @webmethod(route="/evals/job/cancel")
     def cancel_evaluation_job(self, job_uuid: str) -> None: ...
 
     @webmethod(route="/evaluate/job/artifacts")

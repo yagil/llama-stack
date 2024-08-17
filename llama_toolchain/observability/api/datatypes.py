@@ -9,6 +9,7 @@ from enum import Enum
 
 from typing import Any, Dict, Optional, Union
 
+from llama_models.datatypes import URL
 from llama_models.schema_utils import json_schema_type
 
 from pydantic import BaseModel
@@ -60,8 +61,6 @@ class Log(BaseModel):
 
 @json_schema_type
 class ArtifactType(Enum):
-    MODEL = "model"
-    DATASET = "dataset"
     CHECKPOINT = "checkpoint"
     PLOT = "plot"
     METRIC = "metric"
@@ -75,6 +74,7 @@ class Artifact(BaseModel):
     id: str
     name: str
     type: ArtifactType
-    size: int
+    url: URL
+    mime_type: str
     created_at: datetime
     metadata: Dict[str, Any]
