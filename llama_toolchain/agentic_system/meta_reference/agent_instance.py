@@ -121,7 +121,12 @@ class ChatAgent(ShieldRunnerMixin):
         return session
 
     async def create_and_execute_turn(
-        self, request: AgenticSystemTurnCreateRequest
+        self,
+        agent_id: str,
+        session_id: str,
+        messages: List[MessageType]
+        attachments: Optional[List[Attachment]] = None,
+        stream: Optional[bool] = False,
     ) -> AsyncGenerator:
         assert (
             request.session_id in self.sessions

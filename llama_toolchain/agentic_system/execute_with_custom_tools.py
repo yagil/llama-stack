@@ -46,16 +46,14 @@ class AgentWithCustomToolExecutor:
         while n_iter < max_iters:
             n_iter += 1
 
-            request = AgenticSystemTurnCreateRequest(
+            turn = None
+            async for chunk in self.api.create_agentic_system_turn(
                 agent_id=self.agent_id,
                 session_id=self.session_id,
                 messages=current_messages,
                 attachments=attachments,
                 stream=stream,
-            )
-
-            turn = None
-            async for chunk in self.api.create_agentic_system_turn(request):
+            ):
                 if chunk.event.payload.event_type != EventType.turn_complete.value:
                     yield chunk
                 else:

@@ -112,7 +112,11 @@ class MetaReferenceAgenticSystemImpl(AgenticSystem):
 
     async def create_agentic_system_turn(
         self,
-        request: AgenticSystemTurnCreateRequest,
+        agent_id: str,
+        session_id: str,
+        messages: List[MessageType]
+        attachments: Optional[List[Attachment]] = None,
+        stream: Optional[bool] = False,
     ) -> AsyncGenerator:
         agent_id = request.agent_id
         assert agent_id in AGENT_INSTANCES_BY_ID, f"System {agent_id} not found"

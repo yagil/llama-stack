@@ -67,7 +67,11 @@ class AgenticSystemClient(AgenticSystem):
 
     async def create_agentic_system_turn(
         self,
-        request: AgenticSystemTurnCreateRequest,
+        agent_id: str,
+        session_id: str,
+        messages: List[MessageType]
+        attachments: Optional[List[Attachment]] = None,
+        stream: Optional[bool] = False,
     ) -> AsyncGenerator:
         async with httpx.AsyncClient() as client:
             async with client.stream(
@@ -114,15 +118,13 @@ async def _run_agent(api, tool_definitions, user_prompts, attachments=None):
     for content in user_prompts:
         cprint(f"User> {content}", color="white", attrs=["bold"])
         iterator = api.create_agentic_system_turn(
-            AgenticSystemTurnCreateRequest(
-                agent_id=create_response.agent_id,
-                session_id=session_response.session_id,
-                messages=[
-                    UserMessage(content=content),
-                ],
-                attachments=attachments,
-                stream=True,
-            )
+            agent_id=create_response.agent_id,
+            session_id=session_response.session_id,
+            messages=[
+                UserMessage(content=content),
+            ],
+            attachments=attachments,
+            stream=True,
         )
 
         async for event, log in EventLogger().log(iterator):

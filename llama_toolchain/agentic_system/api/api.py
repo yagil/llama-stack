@@ -136,6 +136,14 @@ AgenticSystemToolDefinition = Annotated[
     Field(discriminator="type"),
 ]
 
+# TODO: figure out how we can simplify this and make why
+# ToolResponseMessage needs to be here (it is function call
+# execution from outside the system)
+MessageType = Union[
+    UserMessage,
+    ToolResponseMessage,
+]
+
 
 class StepCommon(BaseModel):
     turn_id: str
@@ -198,12 +206,7 @@ class Turn(BaseModel):
 
     turn_id: str
     session_id: str
-    input_messages: List[
-        Union[
-            UserMessage,
-            ToolResponseMessage,
-        ]
-    ]
+    input_messages: List[MessageType]
     steps: List[Step]
     output_message: CompletionMessage
     output_attachments: List[Attachment] = Field(default_factory=list)
@@ -333,25 +336,6 @@ class AgenticSystemSessionCreateResponse(BaseModel):
 
 
 @json_schema_type
-class AgenticSystemTurnCreateRequest(AgentConfigOverridablePerTurn):
-    agent_id: str
-    session_id: str
-
-    # TODO: figure out how we can simplify this and make why
-    # ToolResponseMessage needs to be here (it is function call
-    # execution from outside the system)
-    messages: List[
-        Union[
-            UserMessage,
-            ToolResponseMessage,
-        ]
-    ]
-    attachments: Optional[List[Attachment]] = None
-
-    stream: Optional[bool] = False
-
-
-@json_schema_type
 class AgenticSystemTurnResponseStreamChunk(BaseModel):
     event: AgenticSystemTurnResponseEvent
 
@@ -371,7 +355,11 @@ class AgenticSystem(Protocol):
     @webmethod(route="/agentic_system/turn/create")
     async def create_agentic_system_turn(
         self,
-        request: AgenticSystemTurnCreateRequest,
+        agent_id: str,
+        session_id: str,
+        messages: List[MessageType],
+        attachments: Optional[List[Attachment]] = None,
+        stream: Optional[bool] = False,
     ) -> AgenticSystemTurnResponseStreamChunk: ...
 
     @webmethod(route="/agentic_system/turn/get")
