@@ -114,16 +114,21 @@ class MetaReferenceAgenticSystemImpl(AgenticSystem):
         self,
         agent_id: str,
         session_id: str,
-        messages: List[MessageType]
+        messages: List[MessageType],
         attachments: Optional[List[Attachment]] = None,
         stream: Optional[bool] = False,
     ) -> AsyncGenerator:
-        agent_id = request.agent_id
         assert agent_id in AGENT_INSTANCES_BY_ID, f"System {agent_id} not found"
         agent = AGENT_INSTANCES_BY_ID[agent_id]
 
         assert (
-            request.session_id in agent.sessions
-        ), f"Session {request.session_id} not found"
-        async for event in agent.create_and_execute_turn(request):
+            session_id in agent.sessions
+        ), f"Session {session_id} not found"
+        async for event in agent.create_and_execute_turn(
+            agent_id=agent_id,
+            session_id=session_id,
+            messages=messages,
+            attachments=attachments,
+            stream=stream,
+        ):
             yield event

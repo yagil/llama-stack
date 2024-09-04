@@ -124,24 +124,24 @@ class ChatAgent(ShieldRunnerMixin):
         self,
         agent_id: str,
         session_id: str,
-        messages: List[MessageType]
+        messages: List[MessageType],
         attachments: Optional[List[Attachment]] = None,
         stream: Optional[bool] = False,
     ) -> AsyncGenerator:
         assert (
-            request.session_id in self.sessions
-        ), f"Session {request.session_id} not found"
+            session_id in self.sessions
+        ), f"Session {session_id} not found"
 
-        session = self.sessions[request.session_id]
+        session = self.sessions[session_id]
 
-        messages = []
+        all_messages = []
         for i, turn in enumerate(session.turns):
-            messages.extend(self.turn_to_messages(turn))
+            all_messages.extend(self.turn_to_messages(turn))
 
-        messages.extend(request.messages)
+        all_messages.extend(messages)
 
         # print("processed dialog ======== ")
-        # print_dialog(messages)
+        # print_dialog(all_messages)
 
         turn_id = str(uuid.uuid4())
         start_time = datetime.now()
@@ -158,10 +158,10 @@ class ChatAgent(ShieldRunnerMixin):
         async for chunk in self.run(
             session=session,
             turn_id=turn_id,
-            input_messages=messages,
-            attachments=request.attachments or [],
+            input_messages=all_messages,
+            attachments=attachments or [],
             sampling_params=self.agent_config.sampling_params,
-            stream=request.stream,
+            stream=stream,
         ):
             if isinstance(chunk, CompletionMessage):
                 cprint(
@@ -188,8 +188,8 @@ class ChatAgent(ShieldRunnerMixin):
 
         turn = Turn(
             turn_id=turn_id,
-            session_id=request.session_id,
-            input_messages=request.messages,
+            session_id=session_id,
+            input_messages=messages,
             output_message=output_message,
             started_at=start_time,
             completed_at=datetime.now(),
