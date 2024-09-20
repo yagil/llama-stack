@@ -4,30 +4,39 @@
 # This source code is licensed under the terms described in the LICENSE file in
 # the root directory of this source tree.
 
+import json
 import threading
-from typing import Any, Type
+from typing import Any, Dict, Optional
 
-from pydantic import Field
-from typing_extensions import Annotated
+from .utils.dynamic import instantiate_class_type
 
 _THREAD_LOCAL = threading.local()
-
-
-def set_request_provider_data(provider_data: Any) -> None:
-    _THREAD_LOCAL.provider_data = provider_data
 
 
 def get_request_provider_data() -> Any:
     return getattr(_THREAD_LOCAL, "provider_data", None)
 
 
-def annotate_header(typ: Type, header_name: str, description: str):
-    assert header_name.startswith("X-LlamaStack-")
-    return Annotated[
-        typ,
-        Field(
-            description=description,
-            alias=header_name.replace("-", "_"),
-            default=None,
-        ),
-    ]
+def set_request_provider_data(headers: Dict[str, str], class_type: Optional[str]):
+    if not class_type:
+        return
+
+    val = headers.get("X-LlamaStack-ProviderData", None)
+    if not val:
+        return
+
+    print("Got provider data", val)
+    try:
+        val = json.loads(val)
+    except json.JSONDecodeError:
+        print("Provider data not encoded as a JSON object!", val)
+        return
+
+    header_extractor = instantiate_class_type(class_type)
+    try:
+        provider_data = header_extractor(**val)
+    except Exception as e:
+        print("Error parsing provider data", e)
+        return
+
+    _THREAD_LOCAL.provider_data = provider_data
