@@ -17,24 +17,31 @@ def get_request_provider_data() -> Any:
     return getattr(_THREAD_LOCAL, "provider_data", None)
 
 
-def set_request_provider_data(headers: Dict[str, str], class_type: Optional[str]):
-    if not class_type:
+def set_request_provider_data(headers: Dict[str, str], validator_class: Optional[str]):
+    if not validator_class:
         return
 
-    val = headers.get("X-LlamaStack-ProviderData", None)
+    keys = [
+        "X-LlamaStack-ProviderData",
+        "x-llamastack-providerdata",
+    ]
+    for key in keys:
+        val = headers.get(key, None)
+        if val:
+            break
+
     if not val:
         return
 
-    print("Got provider data", val)
     try:
         val = json.loads(val)
     except json.JSONDecodeError:
         print("Provider data not encoded as a JSON object!", val)
         return
 
-    header_extractor = instantiate_class_type(class_type)
+    validator = instantiate_class_type(validator_class)
     try:
-        provider_data = header_extractor(**val)
+        provider_data = validator(**val)
     except Exception as e:
         print("Error parsing provider data", e)
         return
