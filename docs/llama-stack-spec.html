@@ -21,7 +21,11 @@
     "info": {
         "title": "[DRAFT] Llama Stack Specification",
         "version": "0.0.1",
+<<<<<<< HEAD
         "description": "This is the specification of the llama stack that provides\n                a set of endpoints and their corresponding interfaces that are tailored to\n                best leverage Llama Models. The specification is still in draft and subject to change.\n                Generated at 2024-09-18 19:27:39.955190"
+=======
+        "description": "This is the specification of the llama stack that provides\n                a set of endpoints and their corresponding interfaces that are tailored to\n                best leverage Llama Models. The specification is still in draft and subject to change.\n                Generated at 2024-09-19 17:20:59.506399"
+>>>>>>> 72204ad (wip)
     },
     "servers": [
         {
@@ -46,7 +50,21 @@
                 "tags": [
                     "BatchInference"
                 ],
+<<<<<<< HEAD
                 "parameters": [],
+=======
+                "parameters": [
+                    {
+                        "name": "X-LlamaStack-ProviderData",
+                        "in": "header",
+                        "description": "JSON-encoded provider data which will be made available to the adapter servicing the API",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+>>>>>>> 72204ad (wip)
                 "requestBody": {
                     "content": {
                         "application/json": {
@@ -76,7 +94,21 @@
                 "tags": [
                     "BatchInference"
                 ],
+<<<<<<< HEAD
                 "parameters": [],
+=======
+                "parameters": [
+                    {
+                        "name": "X-LlamaStack-ProviderData",
+                        "in": "header",
+                        "description": "JSON-encoded provider data which will be made available to the adapter servicing the API",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+>>>>>>> 72204ad (wip)
                 "requestBody": {
                     "content": {
                         "application/json": {
@@ -99,7 +131,21 @@
                 "tags": [
                     "Evaluations"
                 ],
+<<<<<<< HEAD
                 "parameters": [],
+=======
+                "parameters": [
+                    {
+                        "name": "X-LlamaStack-ProviderData",
+                        "in": "header",
+                        "description": "JSON-encoded provider data which will be made available to the adapter servicing the API",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+>>>>>>> 72204ad (wip)
                 "requestBody": {
                     "content": {
                         "application/json": {
@@ -122,7 +168,21 @@
                 "tags": [
                     "PostTraining"
                 ],
+<<<<<<< HEAD
                 "parameters": [],
+=======
+                "parameters": [
+                    {
+                        "name": "X-LlamaStack-ProviderData",
+                        "in": "header",
+                        "description": "JSON-encoded provider data which will be made available to the adapter servicing the API",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+>>>>>>> 72204ad (wip)
                 "requestBody": {
                     "content": {
                         "application/json": {
@@ -159,7 +219,21 @@
                 "tags": [
                     "Inference"
                 ],
+<<<<<<< HEAD
                 "parameters": [],
+=======
+                "parameters": [
+                    {
+                        "name": "X-LlamaStack-ProviderData",
+                        "in": "header",
+                        "description": "JSON-encoded provider data which will be made available to the adapter servicing the API",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+>>>>>>> 72204ad (wip)
                 "requestBody": {
                     "content": {
                         "application/json": {
@@ -196,7 +270,21 @@
                 "tags": [
                     "Inference"
                 ],
+<<<<<<< HEAD
                 "parameters": [],
+=======
+                "parameters": [
+                    {
+                        "name": "X-LlamaStack-ProviderData",
+                        "in": "header",
+                        "description": "JSON-encoded provider data which will be made available to the adapter servicing the API",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+>>>>>>> 72204ad (wip)
                 "requestBody": {
                     "content": {
                         "application/json": {
@@ -226,7 +314,21 @@
                 "tags": [
                     "Agents"
                 ],
+<<<<<<< HEAD
                 "parameters": [],
+=======
+                "parameters": [
+                    {
+                        "name": "X-LlamaStack-ProviderData",
+                        "in": "header",
+                        "description": "JSON-encoded provider data which will be made available to the adapter servicing the API",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+>>>>>>> 72204ad (wip)
                 "requestBody": {
                     "content": {
                         "application/json": {
@@ -256,7 +358,21 @@
                 "tags": [
                     "Agents"
                 ],
+<<<<<<< HEAD
                 "parameters": [],
+=======
+                "parameters": [
+                    {
+                        "name": "X-LlamaStack-ProviderData",
+                        "in": "header",
+                        "description": "JSON-encoded provider data which will be made available to the adapter servicing the API",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+>>>>>>> 72204ad (wip)
                 "requestBody": {
                     "content": {
                         "application/json": {
@@ -286,7 +402,21 @@
                 "tags": [
                     "Agents"
                 ],
+<<<<<<< HEAD
                 "parameters": [],
+=======
+                "parameters": [
+                    {
+                        "name": "X-LlamaStack-ProviderData",
+                        "in": "header",
+                        "description": "JSON-encoded provider data which will be made available to the adapter servicing the API",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+>>>>>>> 72204ad (wip)
                 "requestBody": {
                     "content": {
                         "application/json": {
@@ -309,7 +439,21 @@
                 "tags": [
                     "Datasets"
                 ],
+<<<<<<< HEAD
                 "parameters": [],
+=======
+                "parameters": [
+                    {
+                        "name": "X-LlamaStack-ProviderData",
+                        "in": "header",
+                        "description": "JSON-encoded provider data which will be made available to the adapter servicing the API",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+>>>>>>> 72204ad (wip)
                 "requestBody": {
                     "content": {
                         "application/json": {
@@ -339,7 +483,21 @@
                 "tags": [
                     "Memory"
                 ],
+<<<<<<< HEAD
                 "parameters": [],
+=======
+                "parameters": [
+                    {
+                        "name": "X-LlamaStack-ProviderData",
+                        "in": "header",
+                        "description": "JSON-encoded provider data which will be made available to the adapter servicing the API",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+>>>>>>> 72204ad (wip)
                 "requestBody": {
                     "content": {
                         "application/json": {
@@ -362,7 +520,21 @@
                 "tags": [
                     "Agents"
                 ],
+<<<<<<< HEAD
                 "parameters": [],
+=======
+                "parameters": [
+                    {
+                        "name": "X-LlamaStack-ProviderData",
+                        "in": "header",
+                        "description": "JSON-encoded provider data which will be made available to the adapter servicing the API",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+>>>>>>> 72204ad (wip)
                 "requestBody": {
                     "content": {
                         "application/json": {
@@ -385,7 +557,21 @@
                 "tags": [
                     "Agents"
                 ],
+<<<<<<< HEAD
                 "parameters": [],
+=======
+                "parameters": [
+                    {
+                        "name": "X-LlamaStack-ProviderData",
+                        "in": "header",
+                        "description": "JSON-encoded provider data which will be made available to the adapter servicing the API",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+>>>>>>> 72204ad (wip)
                 "requestBody": {
                     "content": {
                         "application/json": {
@@ -408,7 +594,21 @@
                 "tags": [
                     "Datasets"
                 ],
+<<<<<<< HEAD
                 "parameters": [],
+=======
+                "parameters": [
+                    {
+                        "name": "X-LlamaStack-ProviderData",
+                        "in": "header",
+                        "description": "JSON-encoded provider data which will be made available to the adapter servicing the API",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+>>>>>>> 72204ad (wip)
                 "requestBody": {
                     "content": {
                         "application/json": {
@@ -431,7 +631,21 @@
                 "tags": [
                     "Memory"
                 ],
+<<<<<<< HEAD
                 "parameters": [],
+=======
+                "parameters": [
+                    {
+                        "name": "X-LlamaStack-ProviderData",
+                        "in": "header",
+                        "description": "JSON-encoded provider data which will be made available to the adapter servicing the API",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+>>>>>>> 72204ad (wip)
                 "requestBody": {
                     "content": {
                         "application/json": {
@@ -461,7 +675,21 @@
                 "tags": [
                     "Memory"
                 ],
+<<<<<<< HEAD
                 "parameters": [],
+=======
+                "parameters": [
+                    {
+                        "name": "X-LlamaStack-ProviderData",
+                        "in": "header",
+                        "description": "JSON-encoded provider data which will be made available to the adapter servicing the API",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+>>>>>>> 72204ad (wip)
                 "requestBody": {
                     "content": {
                         "application/json": {
@@ -491,7 +719,21 @@
                 "tags": [
                     "Inference"
                 ],
+<<<<<<< HEAD
                 "parameters": [],
+=======
+                "parameters": [
+                    {
+                        "name": "X-LlamaStack-ProviderData",
+                        "in": "header",
+                        "description": "JSON-encoded provider data which will be made available to the adapter servicing the API",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+>>>>>>> 72204ad (wip)
                 "requestBody": {
                     "content": {
                         "application/json": {
@@ -521,7 +763,21 @@
                 "tags": [
                     "Evaluations"
                 ],
+<<<<<<< HEAD
                 "parameters": [],
+=======
+                "parameters": [
+                    {
+                        "name": "X-LlamaStack-ProviderData",
+                        "in": "header",
+                        "description": "JSON-encoded provider data which will be made available to the adapter servicing the API",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+>>>>>>> 72204ad (wip)
                 "requestBody": {
                     "content": {
                         "application/json": {
@@ -551,7 +807,21 @@
                 "tags": [
                     "Evaluations"
                 ],
+<<<<<<< HEAD
                 "parameters": [],
+=======
+                "parameters": [
+                    {
+                        "name": "X-LlamaStack-ProviderData",
+                        "in": "header",
+                        "description": "JSON-encoded provider data which will be made available to the adapter servicing the API",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+>>>>>>> 72204ad (wip)
                 "requestBody": {
                     "content": {
                         "application/json": {
@@ -581,7 +851,21 @@
                 "tags": [
                     "Evaluations"
                 ],
+<<<<<<< HEAD
                 "parameters": [],
+=======
+                "parameters": [
+                    {
+                        "name": "X-LlamaStack-ProviderData",
+                        "in": "header",
+                        "description": "JSON-encoded provider data which will be made available to the adapter servicing the API",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+>>>>>>> 72204ad (wip)
                 "requestBody": {
                     "content": {
                         "application/json": {
@@ -627,6 +911,18 @@
                         "schema": {
                             "type": "string"
                         }
+<<<<<<< HEAD
+=======
+                    },
+                    {
+                        "name": "X-LlamaStack-ProviderData",
+                        "in": "header",
+                        "description": "JSON-encoded provider data which will be made available to the adapter servicing the API",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+>>>>>>> 72204ad (wip)
                     }
                 ],
                 "requestBody": {
@@ -682,6 +978,18 @@
                         "schema": {
                             "type": "string"
                         }
+<<<<<<< HEAD
+=======
+                    },
+                    {
+                        "name": "X-LlamaStack-ProviderData",
+                        "in": "header",
+                        "description": "JSON-encoded provider data which will be made available to the adapter servicing the API",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+>>>>>>> 72204ad (wip)
                     }
                 ]
             }
@@ -719,6 +1027,18 @@
                         "schema": {
                             "type": "string"
                         }
+<<<<<<< HEAD
+=======
+                    },
+                    {
+                        "name": "X-LlamaStack-ProviderData",
+                        "in": "header",
+                        "description": "JSON-encoded provider data which will be made available to the adapter servicing the API",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+>>>>>>> 72204ad (wip)
                     }
                 ]
             }
@@ -748,6 +1068,18 @@
                         "schema": {
                             "type": "string"
                         }
+<<<<<<< HEAD
+=======
+                    },
+                    {
+                        "name": "X-LlamaStack-ProviderData",
+                        "in": "header",
+                        "description": "JSON-encoded provider data which will be made available to the adapter servicing the API",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+>>>>>>> 72204ad (wip)
                     }
                 ]
             }
@@ -777,6 +1109,18 @@
                         "schema": {
                             "type": "string"
                         }
+<<<<<<< HEAD
+=======
+                    },
+                    {
+                        "name": "X-LlamaStack-ProviderData",
+                        "in": "header",
+                        "description": "JSON-encoded provider data which will be made available to the adapter servicing the API",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+>>>>>>> 72204ad (wip)
                     }
                 ],
                 "requestBody": {
@@ -816,6 +1160,18 @@
                         "schema": {
                             "type": "string"
                         }
+<<<<<<< HEAD
+=======
+                    },
+                    {
+                        "name": "X-LlamaStack-ProviderData",
+                        "in": "header",
+                        "description": "JSON-encoded provider data which will be made available to the adapter servicing the API",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+>>>>>>> 72204ad (wip)
                     }
                 ]
             }
@@ -845,6 +1201,18 @@
                         "schema": {
                             "type": "string"
                         }
+<<<<<<< HEAD
+=======
+                    },
+                    {
+                        "name": "X-LlamaStack-ProviderData",
+                        "in": "header",
+                        "description": "JSON-encoded provider data which will be made available to the adapter servicing the API",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+>>>>>>> 72204ad (wip)
                     }
                 ]
             }
@@ -874,6 +1242,18 @@
                         "schema": {
                             "type": "string"
                         }
+<<<<<<< HEAD
+=======
+                    },
+                    {
+                        "name": "X-LlamaStack-ProviderData",
+                        "in": "header",
+                        "description": "JSON-encoded provider data which will be made available to the adapter servicing the API",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+>>>>>>> 72204ad (wip)
                     }
                 ]
             }
@@ -895,7 +1275,21 @@
                 "tags": [
                     "Evaluations"
                 ],
+<<<<<<< HEAD
                 "parameters": []
+=======
+                "parameters": [
+                    {
+                        "name": "X-LlamaStack-ProviderData",
+                        "in": "header",
+                        "description": "JSON-encoded provider data which will be made available to the adapter servicing the API",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ]
+>>>>>>> 72204ad (wip)
             }
         },
         "/memory_banks/get": {
@@ -930,6 +1324,18 @@
                         "schema": {
                             "type": "string"
                         }
+<<<<<<< HEAD
+=======
+                    },
+                    {
+                        "name": "X-LlamaStack-ProviderData",
+                        "in": "header",
+                        "description": "JSON-encoded provider data which will be made available to the adapter servicing the API",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+>>>>>>> 72204ad (wip)
                     }
                 ]
             }
@@ -959,6 +1365,18 @@
                         "schema": {
                             "type": "string"
                         }
+<<<<<<< HEAD
+=======
+                    },
+                    {
+                        "name": "X-LlamaStack-ProviderData",
+                        "in": "header",
+                        "description": "JSON-encoded provider data which will be made available to the adapter servicing the API",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+>>>>>>> 72204ad (wip)
                     }
                 ]
             }
@@ -988,6 +1406,18 @@
                         "schema": {
                             "type": "string"
                         }
+<<<<<<< HEAD
+=======
+                    },
+                    {
+                        "name": "X-LlamaStack-ProviderData",
+                        "in": "header",
+                        "description": "JSON-encoded provider data which will be made available to the adapter servicing the API",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+>>>>>>> 72204ad (wip)
                     }
                 ]
             }
@@ -1017,6 +1447,18 @@
                         "schema": {
                             "type": "string"
                         }
+<<<<<<< HEAD
+=======
+                    },
+                    {
+                        "name": "X-LlamaStack-ProviderData",
+                        "in": "header",
+                        "description": "JSON-encoded provider data which will be made available to the adapter servicing the API",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+>>>>>>> 72204ad (wip)
                     }
                 ]
             }
@@ -1046,6 +1488,18 @@
                         "schema": {
                             "type": "string"
                         }
+<<<<<<< HEAD
+=======
+                    },
+                    {
+                        "name": "X-LlamaStack-ProviderData",
+                        "in": "header",
+                        "description": "JSON-encoded provider data which will be made available to the adapter servicing the API",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+>>>>>>> 72204ad (wip)
                     }
                 ]
             }
@@ -1067,7 +1521,21 @@
                 "tags": [
                     "PostTraining"
                 ],
+<<<<<<< HEAD
                 "parameters": []
+=======
+                "parameters": [
+                    {
+                        "name": "X-LlamaStack-ProviderData",
+                        "in": "header",
+                        "description": "JSON-encoded provider data which will be made available to the adapter servicing the API",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ]
+>>>>>>> 72204ad (wip)
             }
         },
         "/memory_bank/insert": {
@@ -1080,7 +1548,21 @@
                 "tags": [
                     "Memory"
                 ],
+<<<<<<< HEAD
                 "parameters": [],
+=======
+                "parameters": [
+                    {
+                        "name": "X-LlamaStack-ProviderData",
+                        "in": "header",
+                        "description": "JSON-encoded provider data which will be made available to the adapter servicing the API",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+>>>>>>> 72204ad (wip)
                 "requestBody": {
                     "content": {
                         "application/json": {
@@ -1110,7 +1592,21 @@
                 "tags": [
                     "Memory"
                 ],
+<<<<<<< HEAD
                 "parameters": []
+=======
+                "parameters": [
+                    {
+                        "name": "X-LlamaStack-ProviderData",
+                        "in": "header",
+                        "description": "JSON-encoded provider data which will be made available to the adapter servicing the API",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ]
+>>>>>>> 72204ad (wip)
             }
         },
         "/telemetry/log_event": {
@@ -1123,7 +1619,21 @@
                 "tags": [
                     "Telemetry"
                 ],
+<<<<<<< HEAD
                 "parameters": [],
+=======
+                "parameters": [
+                    {
+                        "name": "X-LlamaStack-ProviderData",
+                        "in": "header",
+                        "description": "JSON-encoded provider data which will be made available to the adapter servicing the API",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+>>>>>>> 72204ad (wip)
                 "requestBody": {
                     "content": {
                         "application/json": {
@@ -1153,7 +1663,21 @@
                 "tags": [
                     "PostTraining"
                 ],
+<<<<<<< HEAD
                 "parameters": [],
+=======
+                "parameters": [
+                    {
+                        "name": "X-LlamaStack-ProviderData",
+                        "in": "header",
+                        "description": "JSON-encoded provider data which will be made available to the adapter servicing the API",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+>>>>>>> 72204ad (wip)
                 "requestBody": {
                     "content": {
                         "application/json": {
@@ -1183,7 +1707,21 @@
                 "tags": [
                     "Memory"
                 ],
+<<<<<<< HEAD
                 "parameters": [],
+=======
+                "parameters": [
+                    {
+                        "name": "X-LlamaStack-ProviderData",
+                        "in": "header",
+                        "description": "JSON-encoded provider data which will be made available to the adapter servicing the API",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+>>>>>>> 72204ad (wip)
                 "requestBody": {
                     "content": {
                         "application/json": {
@@ -1213,7 +1751,21 @@
                 "tags": [
                     "RewardScoring"
                 ],
+<<<<<<< HEAD
                 "parameters": [],
+=======
+                "parameters": [
+                    {
+                        "name": "X-LlamaStack-ProviderData",
+                        "in": "header",
+                        "description": "JSON-encoded provider data which will be made available to the adapter servicing the API",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+>>>>>>> 72204ad (wip)
                 "requestBody": {
                     "content": {
                         "application/json": {
@@ -1243,7 +1795,21 @@
                 "tags": [
                     "Safety"
                 ],
+<<<<<<< HEAD
                 "parameters": [],
+=======
+                "parameters": [
+                    {
+                        "name": "X-LlamaStack-ProviderData",
+                        "in": "header",
+                        "description": "JSON-encoded provider data which will be made available to the adapter servicing the API",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+>>>>>>> 72204ad (wip)
                 "requestBody": {
                     "content": {
                         "application/json": {
@@ -1273,7 +1839,21 @@
                 "tags": [
                     "PostTraining"
                 ],
+<<<<<<< HEAD
                 "parameters": [],
+=======
+                "parameters": [
+                    {
+                        "name": "X-LlamaStack-ProviderData",
+                        "in": "header",
+                        "description": "JSON-encoded provider data which will be made available to the adapter servicing the API",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+>>>>>>> 72204ad (wip)
                 "requestBody": {
                     "content": {
                         "application/json": {
@@ -1303,7 +1883,21 @@
                 "tags": [
                     "SyntheticDataGeneration"
                 ],
+<<<<<<< HEAD
                 "parameters": [],
+=======
+                "parameters": [
+                    {
+                        "name": "X-LlamaStack-ProviderData",
+                        "in": "header",
+                        "description": "JSON-encoded provider data which will be made available to the adapter servicing the API",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+>>>>>>> 72204ad (wip)
                 "requestBody": {
                     "content": {
                         "application/json": {
@@ -1326,7 +1920,21 @@
                 "tags": [
                     "Memory"
                 ],
+<<<<<<< HEAD
                 "parameters": [],
+=======
+                "parameters": [
+                    {
+                        "name": "X-LlamaStack-ProviderData",
+                        "in": "header",
+                        "description": "JSON-encoded provider data which will be made available to the adapter servicing the API",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+>>>>>>> 72204ad (wip)
                 "requestBody": {
                     "content": {
                         "application/json": {
@@ -5152,6 +5760,7 @@
             "name": "BatchInference"
         },
         {
+<<<<<<< HEAD
             "name": "PostTraining"
         },
         {
@@ -5173,12 +5782,38 @@
             "name": "SyntheticDataGeneration"
         },
         {
+=======
+            "name": "Inference"
+        },
+        {
+>>>>>>> 72204ad (wip)
             "name": "Memory"
         },
         {
             "name": "Agents"
         },
         {
+<<<<<<< HEAD
+=======
+            "name": "Telemetry"
+        },
+        {
+            "name": "PostTraining"
+        },
+        {
+            "name": "Safety"
+        },
+        {
+            "name": "SyntheticDataGeneration"
+        },
+        {
+            "name": "RewardScoring"
+        },
+        {
+            "name": "Evaluations"
+        },
+        {
+>>>>>>> 72204ad (wip)
             "name": "Datasets"
         },
         {
