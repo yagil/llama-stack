@@ -1,20 +1,27 @@
+# Copyright (c) Meta Platforms, Inc. and affiliates.
+# All rights reserved.
+#
+# This source code is licensed under the terms described in the LICENSE file in
+# the root directory of this source tree.
+
+import threading
+from typing import Any, Type
+
 from pydantic import Field
 from typing_extensions import Annotated
 
-import threading
-
-_thread_local = threading.local()
-
-def set_header_context(context: Any) -> None:
-    _thread_local.context = context
-
-def get_header_context() -> Any:
-    return getattr(_thread_local, 'context', None)
+_THREAD_LOCAL = threading.local()
 
 
-def annotate_header(
-    typ: Type, header_name: str, description: str
-):
+def set_request_provider_data(provider_data: Any) -> None:
+    _THREAD_LOCAL.provider_data = provider_data
+
+
+def get_request_provider_data() -> Any:
+    return getattr(_THREAD_LOCAL, "provider_data", None)
+
+
+def annotate_header(typ: Type, header_name: str, description: str):
     assert header_name.startswith("X-LlamaStack-")
     return Annotated[
         typ,

@@ -188,7 +188,7 @@ def create_dynamic_typed_route(func: Any, method: str):
 
     if is_streaming:
 
-        async def endpoint(**kwargs):
+        async def endpoint(request: Request, **kwargs):
             await start_trace(func.__name__)
 
             async def sse_generator(event_gen):
@@ -217,7 +217,8 @@ def create_dynamic_typed_route(func: Any, method: str):
 
     else:
 
-        async def endpoint(**kwargs):
+        async def endpoint(request: Request, **kwargs):
+            print(request.headers)
             await start_trace(func.__name__)
             try:
                 return (
@@ -232,20 +233,23 @@ def create_dynamic_typed_route(func: Any, method: str):
                 await end_trace()
 
     sig = inspect.signature(func)
+    new_params = [
+        inspect.Parameter(
+            "request", inspect.Parameter.POSITIONAL_OR_KEYWORD, annotation=Request
+        )
+    ]
+    new_params.extend(sig.parameters.values())
+
     if method == "post":
         # make sure every parameter is annotated with Body() so FASTAPI doesn't
         # do anything too intelligent and ask for some parameters in the query
         # and some in the body
-        endpoint.__signature__ = sig.replace(
-            parameters=[
-                param.replace(
-                    annotation=Annotated[param.annotation, Body(..., embed=True)]
-                )
-                for param in sig.parameters.values()
-            ]
-        )
-    else:
-        endpoint.__signature__ = sig
+        new_params = [new_params[0]] + [
+            param.replace(annotation=Annotated[param.annotation, Body(..., embed=True)])
+            for param in new_params[1:]
+        ]
+
+    endpoint.__signature__ = sig.replace(parameters=new_params)
 
     return endpoint
 
