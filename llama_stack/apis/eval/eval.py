@@ -4,7 +4,9 @@
 # This source code is licensed under the terms described in the LICENSE file in
 # the root directory of this source tree.
 
-from typing import Optional
+from typing import Literal, Optional, Protocol, Union
+
+from typing_extensions import Annotated
 
 from llama_models.llama3.api.datatypes import *  # noqa: F403
 from llama_models.schema_utils import json_schema_type, webmethod
@@ -12,6 +14,7 @@ from llama_models.schema_utils import json_schema_type, webmethod
 
 @json_schema_type
 class ModelCandidate(BaseModel):
+    type: Literal["model"] = "model"
     model: str
     sampling_params: SamplingParams
     system_message: Optional[SystemMessage] = None
@@ -19,16 +22,18 @@ class ModelCandidate(BaseModel):
 
 @json_schema_type
 class AgentCandidate(BaseModel):
+    type: Literal["agent"] = "agent"
     config: AgentConfig
 
 
-EvalCandidate = ModelCandidate | AgentCandidate
+EvalCandidate = Annotated[
+    Union[ModelCandidate, AgentCandidate], Field(discriminator="type")
+]
 
 
 @json_schema_type
 class Job(BaseModel):
     job_id: str
-    job_type: "eval-generate" | "batch-infer" | "fine-tune"
 
 
 class Eval(Protocol):

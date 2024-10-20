@@ -4,55 +4,17 @@
 # This source code is licensed under the terms described in the LICENSE file in
 # the root directory of this source tree.
 
-from enum import Enum
-from typing import Any, Dict, List, Literal, Optional, Protocol, Union
+from typing import Any, Dict, List, Optional, Protocol, runtime_checkable
 
 from llama_models.llama3.api.datatypes import URL
 from llama_models.schema_utils import json_schema_type, webmethod
 from pydantic import BaseModel, Field
 
-
-class ColumnType(str, Enum):
-    # Primitive types
-    STRING = "string"
-    INTEGER = "integer"
-    FLOAT = "float"
-    BOOLEAN = "boolean"
-
-    # Special server-validated types
-    INFERENCE_INPUT = "inference_input"
-    INFERENCE_OUTPUT = "inference_output"
-    TURN_INPUT = "turn_input"
-    TURN_OUTPUT = "turn_output"
-
-    # Blob
-    JSON = "json"
-
-
-class ListType(BaseModel):
-    type: Literal["array"] = "array"
-    items: Union[ColumnType, "ComplexType"]
-
-
-class DictType(BaseModel):
-    type: Literal["object"] = "object"
-    properties: Dict[str, Union[ColumnType, "ComplexType"]] = Field(
-        default_factory=dict
-    )
-
-
-class ComplexType(BaseModel):
-    type: Union[ListType, DictType]
-
-
-ComplexType.model_rebuild()
-ListType.model_rebuild()
-
-ColumnDefinition = Union[ColumnType, ComplexType]
+from llama_stack.apis.common.type_system import ParamType
 
 
 class DatasetSchema(BaseModel):
-    columns: Dict[str, ColumnDefinition]
+    columns: Dict[str, ParamType]
 
 
 class DatasetDef(BaseModel):
