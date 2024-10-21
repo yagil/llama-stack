@@ -10,6 +10,7 @@ from typing_extensions import Annotated
 
 from llama_models.llama3.api.datatypes import *  # noqa: F403
 from llama_models.schema_utils import json_schema_type, webmethod
+from llama_stack.apis.scoring_functions import *  # noqa: F403
 
 
 @json_schema_type
@@ -36,13 +37,30 @@ class Job(BaseModel):
     job_id: str
 
 
+@json_schema_type
+class EvaluateResponse(BaseModel):
+    generations: List[Dict[str, Any]]
+
+    # each key in the dict is a scoring function name
+    scores: List[Dict[str, ScoringResult]]
+
+
 class Eval(Protocol):
-    @webmethod(route="/eval/evaluate_task", method="POST")
-    async def evaluate_task(
+    @webmethod(route="/eval/evaluate_batch", method="POST")
+    async def evaluate_batch(
         self,
         dataset_id: str,
         candidate: EvalCandidate,
+        scoring_functions: List[str],
     ) -> Job: ...
+
+    @webmethod(route="/eval/evaluate", method="POST")
+    async def evaluate(
+        self,
+        input_rows: List[Dict[str, Any]],
+        candidate: EvalCandidate,
+        scoring_functions: List[str],
+    ) -> EvaluateResponse: ...
 
     @webmethod(route="/eval/job/status", method="GET")
     async def job_status(self, job_id: str) -> None: ...

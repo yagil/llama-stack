@@ -4,10 +4,20 @@
 # This source code is licensed under the terms described in the LICENSE file in
 # the root directory of this source tree.
 
-from typing import Any, List, Optional, Protocol
+from typing import (
+    Any,
+    Dict,
+    List,
+    Literal,
+    Optional,
+    Protocol,
+    runtime_checkable,
+    Union,
+)
 
 from llama_models.schema_utils import json_schema_type, webmethod
 from pydantic import BaseModel, Field
+from typing_extensions import Annotated
 
 from llama_stack.apis.common.type_system import ParamType
 
@@ -18,26 +28,40 @@ class Parameter(BaseModel):
     description: Optional[str] = None
 
 
-class ScoringFunctionDef(BaseModel):
-    name: str = Field(
-        description="A unique name for the scoring function",
-    )
-    parameters: List[Parameter] = Field(
-        description="List of parameters for the scoring function",
-    )
-    return_type: ParamType = Field(
-        description="The return type of the scoring function",
-    )
-    description: Optional[str] = Field(
-        default=None,
-        description="A description of what the scoring function does",
-    )
+# Perhaps more structure can be imposed on these functions. Maybe they could be associated
+# with standard metrics so they can be rolled up?
+
+
+class CommonDef(BaseModel):
+    name: str
+    description: Optional[str] = None
     metadata: Dict[str, Any] = Field(
         default_factory=dict,
-        description="Any additional metadata for this scoring function",
+        description="Any additional metadata for this definition",
     )
 
+
+class DeterministicFunctionDef(CommonDef):
+    type: Literal["deterministic"] = "deterministic"
+    parameters: List[Parameter] = Field(
+        description="List of parameters for the deterministic function",
+    )
+    return_type: ParamType = Field(
+        description="The return type of the deterministic function",
+    )
     # We can optionally add information here to support packaging of code, etc.
+
+
+class LLMJudgeFunctionDef(CommonDef):
+    type: Literal["judge"] = "judge"
+    model: str = Field(
+        description="The LLM model to use for the judge function",
+    )
+
+
+ScoringFunctionDef = Annotated[
+    Union[DeterministicFunctionDef, LLMJudgeFunctionDef], Field(discriminator="type")
+]
 
 
 @json_schema_type
