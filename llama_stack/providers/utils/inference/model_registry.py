@@ -105,3 +105,14 @@ class ModelRegistryHelper(ModelsProtocolPrivate):
                 )
 
         return model
+
+    async def unregister_model(self, model_id: str) -> None:
+        model = self.get_llama_model(model_id)
+        if model is None:
+            raise ValueError(f"Model '{model_id}' is not registered'")
+        provider_resource_id = self.get_provider_model_id(model_id)
+        if provider_resource_id is None:
+            raise ValueError(
+                f"Provider resource id does not exist for model id '{model_id}''"
+            )
+        del self.provider_id_to_llama_model_map[provider_resource_id]

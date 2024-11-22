@@ -70,3 +70,23 @@ class TestModelRegistration:
                 model_id="custom-model-2",
                 metadata={"llama_model": "invalid-llama-model"},
             )
+
+    @pytest.mark.asyncio
+    async def test_unregister(self, inference_stack):
+        _, models_impl = inference_stack
+
+        for model_id in ["Llama3.2-3B-Instruct"]:
+            await models_impl.register_model(
+                model_id=model_id,
+                provider_id="",
+            )
+        response = await models_impl.list_models()
+        assert len(response) > 0
+
+        with pytest.raises(ValueError) as exc_info:
+            await models_impl.unregister_model(model_id="Llama3.1-70B-Instruct")
+        await models_impl.unregister_model(model_id="Llama3.2-3B-Instruct")
+
+        response = await models_impl.list_models()
+        for model in response:
+            assert "Llama3.2-3B-Instruct" != model.identifier
