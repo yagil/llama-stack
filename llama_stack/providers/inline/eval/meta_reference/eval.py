@@ -76,6 +76,13 @@ class MetaReferenceEvalImpl(Eval, EvalTasksProtocolPrivate):
         )
         self.eval_tasks[task_def.identifier] = task_def
 
+    async def unregister_eval_task(self, eval_task_id: str) -> None:
+        key = f"{EVAL_TASKS_PREFIX}{eval_task_id}"
+        await self.kvstore.delete(
+            key=key,
+        )
+        del self.eval_tasks[eval_task_id]
+
     async def validate_eval_input_dataset_schema(self, dataset_id: str) -> None:
         dataset_def = await self.datasets_api.get_dataset(dataset_id=dataset_id)
         if not dataset_def.dataset_schema or len(dataset_def.dataset_schema) == 0:

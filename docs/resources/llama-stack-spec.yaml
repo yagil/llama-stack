@@ -3260,6 +3260,14 @@ components:
       required:
       - dataset_id
       type: object
+    UnregisterShieldRequest:
+      additionalProperties: false
+      properties:
+        shield_id:
+          type: string
+      required:
+      - shield_id
+      type: object
     UnstructuredLogEvent:
       additionalProperties: false
       properties:
@@ -4760,6 +4768,31 @@ paths:
           description: OK
       tags:
       - Shields
+ /alpha/shields/unregister:
+    post:
+      parameters:
+      - description: JSON-encoded provider data which will be made available to the
+          adapter servicing the API
+        in: header
+        name: X-LlamaStack-ProviderData
+        required: false
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UnregisterShieldRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Shield'
+          description: OK
+      tags:
+      - Shields
   /alpha/synthetic-data-generation/generate:
     post:
       parameters:
@@ -5274,6 +5307,9 @@ tags:
 - description: <SchemaDefinition schemaRef="#/components/schemas/UnregisterDatasetRequest"
     />
   name: UnregisterDatasetRequest
+- description: <SchemaDefinition schemaRef="#/components/schemas/UnregisterShieldRequest"
+    />
+  name: UnregisterShieldRequest
 - description: <SchemaDefinition schemaRef="#/components/schemas/UnstructuredLogEvent"
     />
   name: UnstructuredLogEvent
@@ -5451,6 +5487,7 @@ x-tagGroups:
   - UnregisterMemoryBankRequest
   - UnregisterModelRequest
   - UnregisterDatasetRequest
+  - UnregisterShieldRequest
   - UnstructuredLogEvent
   - UserMessage
   - VectorMemoryBank

@@ -48,6 +48,22 @@ class BedrockSafetyAdapter(Safety, ShieldsProtocolPrivate):
                 f"Shield {shield.provider_resource_id} with version {shield.params['guardrailVersion']} not found in Bedrock"
             )
 
+    async def unregister_shield(self, shield_id: str) -> None:
+        shield = await self.shield_store.get_shield(shield_id)
+        if shield is None:
+            raise ValueError(f"Shield {shield_id} not exist")
+        response = self.bedrock_client.list_guardrails(
+            guardrailIdentifier=shield.provider_resource_id,
+        )
+        if (
+            not response["guardrails"]
+            or len(response["guardrails"]) == 0
+            or response["guardrails"][0]["version"] != shield.params["guardrailVersion"]
+        ):
+            raise ValueError(
+                f"Shield {shield.provider_resource_id} with version {shield.params['guardrailVersion']} not found in Bedrock"
+            )
+
     async def run_shield(
         self, shield_id: str, messages: List[Message], params: Dict[str, Any] = None
     ) -> RunShieldResponse:

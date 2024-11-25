@@ -35,6 +35,12 @@ class MetaReferenceCodeScannerSafetyImpl(Safety):
             raise ValueError(
                 f"Unsupported Code Scanner ID: {shield.provider_resource_id}. Allowed IDs: {ALLOWED_CODE_SCANNER_MODEL_IDS}"
             )
+    
+    async def unregister_shield(self, provider_resource_id: str) -> None:
+        if provider_resource_id not in ALLOWED_CODE_SCANNER_MODEL_IDS:
+            raise ValueError(
+                f"Unsupported Code Scanner ID: {provider_resource_id}. Allowed IDs: {ALLOWED_CODE_SCANNER_MODEL_IDS}"
+            )        
 
     async def run_shield(
         self,

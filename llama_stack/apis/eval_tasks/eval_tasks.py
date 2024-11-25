@@ -58,3 +58,9 @@ class EvalTasks(Protocol):
         provider_id: Optional[str] = None,
         metadata: Optional[Dict[str, Any]] = None,
     ) -> None: ...
+
+    @webmethod(route="/eval-tasks/unregister", method="POST")
+    async def unregister_eval_task(
+        self,
+        eval_task_id: str,
+    ) -> None: ...

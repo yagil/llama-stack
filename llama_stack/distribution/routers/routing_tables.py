@@ -59,6 +59,8 @@ async def unregister_object_from_provider(obj: RoutableObject, p: Any) -> None:
         return await p.unregister_model(obj.identifier)
     elif api == Api.datasetio:
         return await p.unregister_dataset(obj.identifier)
+    elif api == Api.safety:
+        return await p.unregister_shield(obj.provider_resource_id)
     else:
         raise ValueError(f"Unregister not supported for {api}")
 
@@ -273,6 +275,12 @@ class ShieldsRoutingTable(CommonRoutingTableImpl, Shields):
         await self.register_object(shield)
         return shield
 
+    async def unregister_shield(self, shield_id: str) -> None:
+        shield = await self.get_shield(shield_id)
+        if shield is None:
+            raise ValueError(f"Shield {shield_id} not found")
+        await self.unregister_object(shield)
+
 
 class MemoryBanksRoutingTable(CommonRoutingTableImpl, MemoryBanks):
     async def list_memory_banks(self) -> List[MemoryBank]:
@@ -399,6 +407,12 @@ class ScoringFunctionsRoutingTable(CommonRoutingTableImpl, ScoringFunctions):
         scoring_fn.provider_id = provider_id
         await self.register_object(scoring_fn)
 
+    async def unregister_scoring_function(self, scoring_fn_id: str) -> None:
+        scoring_function = await self.get_scoring_function(scoring_fn_id)
+        if scoring_function is None:
+            raise ValueError(f"Scoring function {scoring_fn_id} does not exist")
+        await self.unregister_object(scoring_function)
+
 
 class EvalTasksRoutingTable(CommonRoutingTableImpl, EvalTasks):
     async def list_eval_tasks(self) -> List[EvalTask]:
@@ -436,3 +450,11 @@ class EvalTasksRoutingTable(CommonRoutingTableImpl, EvalTasks):
             provider_resource_id=provider_eval_task_id,
         )
         await self.register_object(eval_task)
+
+    async def unregister_eval_task(
+        self,
+        eval_task_id: str) -> None:
+        eval_task = await self.get_eval_task(eval_task_id)
+        if eval_task is None:
+            raise ValueError(f"Eval task {eval_task_id} not found")
+        await self.unregister_object(eval_task)

@@ -120,3 +120,8 @@ class ScoringFunctions(Protocol):
         provider_id: Optional[str] = None,
         params: Optional[ScoringFnParams] = None,
     ) -> None: ...
+
+    @webmethod(route="/scoring-functions/register", method="POST")
+    async def unregister_scoring_function(
+        self,
+        scoring_fn_id: str) -> None: ...

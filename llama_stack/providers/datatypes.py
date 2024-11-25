@@ -51,6 +51,8 @@ class ModelsProtocolPrivate(Protocol):
 class ShieldsProtocolPrivate(Protocol):
     async def register_shield(self, shield: Shield) -> None: ...
 
+    async def unregister_shield(self, shield_id: str) -> None: ...
+
 
 class MemoryBanksProtocolPrivate(Protocol):
     async def list_memory_banks(self) -> List[MemoryBank]: ...
@@ -74,6 +76,8 @@ class ScoringFunctionsProtocolPrivate(Protocol):
 
 class EvalTasksProtocolPrivate(Protocol):
     async def register_eval_task(self, eval_task: EvalTask) -> None: ...
+
+    async def unregister_eval_task(self, eval_task_id: str) -> None: ...
 
 
 @json_schema_type

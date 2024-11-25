@@ -54,6 +54,20 @@ class ShieldsClient(Shields):
             )
             response.raise_for_status()
 
+    async def unregister_shield(
+        self,
+        shield_id: str,
+    ) -> None:
+        async with httpx.AsyncClient() as client:
+            response = await client.delete(
+                f"{self.base_url}/shields/unregister",
+                params={
+                    "shield_id": shield_id,
+                },
+                headers={"Content-Type": "application/json"},
+            )
+            response.raise_for_status()
+
     async def get_shield(self, shield_id: str) -> Optional[Shield]:
         async with httpx.AsyncClient() as client:
             response = await client.get(

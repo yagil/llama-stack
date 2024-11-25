@@ -137,6 +137,12 @@ class LlamaGuardSafetyImpl(Safety, ShieldsProtocolPrivate):
                 f"Unsupported Llama Guard type: {shield.provider_resource_id}. Allowed types: {LLAMA_GUARD_MODEL_IDS}"
             )
 
+    async def unregister_shield(self, provider_resource_id: str) -> None: 
+        if provider_resource_id not in LLAMA_GUARD_MODEL_IDS:
+            raise ValueError(
+                f"Unsupported Llama Guard type: {provider_resource_id}. Allowed types: {LLAMA_GUARD_MODEL_IDS}"
+            )        
+
     async def run_shield(
         self,
         shield_id: str,

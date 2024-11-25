@@ -2317,6 +2317,39 @@
                     "content": {
                         "application/json": {
                             "schema": {
+                                "$ref": "#/components/schemas/UnregisterShieldRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                }
+            }
+        },
+        "/alpha/shields/unregister": {
+            "post": {
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                },
+                "tags": [
+                    "Shields"
+                ],
+                "parameters": [
+                    {
+                        "name": "X-LlamaStack-ProviderData",
+                        "in": "header",
+                        "description": "JSON-encoded provider data which will be made available to the adapter servicing the API",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
                                 "$ref": "#/components/schemas/UnregisterDatasetRequest"
                             }
                         }

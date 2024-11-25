@@ -53,3 +53,9 @@ class Shields(Protocol):
         provider_id: Optional[str] = None,
         params: Optional[Dict[str, Any]] = None,
     ) -> Shield: ...
+
+    @webmethod(route="/shields/unregister", method="POST")
+    async def unregister_shield(
+        self,
+        shield_id: str,
+    ) -> None: ...
