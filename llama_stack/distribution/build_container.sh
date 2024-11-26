@@ -169,8 +169,17 @@ else
   exit 1
 fi
 
-set -x
-$DOCKER_BINARY build $DOCKER_OPTS $PLATFORM -t $image_tag -f "$TEMP_DIR/Dockerfile" "$REPO_DIR" $mounts
+# Create a new builder instance if it doesn't exist
+docker buildx create --name llama_builder --use || true
+
+# Build and push multi-platform images
+docker buildx build \
+  $DOCKER_OPTS \
+  --platform linux/amd64,linux/arm64 \
+  --push \
+  -t $image_tag \
+  -f "$TEMP_DIR/Dockerfile" \
+  "$REPO_DIR" $mounts
 
 # clean up tmp/configs
 set +x
