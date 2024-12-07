@@ -42,6 +42,8 @@ class MetaReferenceInferenceImpl(
     def __init__(self, config: MetaReferenceInferenceConfig) -> None:
         self.config = config
         model = resolve_model(config.model)
+        if model is None:
+            raise RuntimeError(f"Unknown model: {config.model}, Run `llama model list`")
         self.model_registry_helper = ModelRegistryHelper(
             [
                 build_model_alias(
@@ -50,8 +52,6 @@ class MetaReferenceInferenceImpl(
                 )
             ],
         )
-        if model is None:
-            raise RuntimeError(f"Unknown model: {config.model}, Run `llama model list`")
         self.model = model
         # verify that the checkpoint actually is for this model lol
 
@@ -81,11 +81,11 @@ class MetaReferenceInferenceImpl(
     async def unregister_model(self, model_id: str) -> None:
         pass
 
-    async def register_model(self, model_id: str) -> None:
-        model = self.model_store.get_model(model_id)
-        model = self.model_registry_helper.register_model(model)
+    async def register_model(self, model: Model) -> Model:
+        model = await self.model_registry_helper.register_model(model)
         if model.model_type == ModelType.embedding_model:
             self._get_embedding_model(model.provider_resource_id)
+        return model
 
     async def completion(
         self,
