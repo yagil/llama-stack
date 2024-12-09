@@ -35,9 +35,7 @@ class ModelsClient(Models):
             response.raise_for_status()
             return [Model(**x) for x in response.json()]
 
-    async def register_model(
-        self, model: Model, is_embedding_model: bool = False
-    ) -> None:
+    async def register_model(self, model: Model) -> None:
         async with httpx.AsyncClient() as client:
             response = await client.post(
                 f"{self.base_url}/models/register",

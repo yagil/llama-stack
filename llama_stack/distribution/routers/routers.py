@@ -146,7 +146,7 @@ class InferenceRouter(Inference):
             raise ValueError(
                 f"Model '{model_id}' is an embedding model and does not support chat completions"
             )
-        provider = await self.routing_table.get_provider_impl(model_id)
+        provider = self.routing_table.get_provider_impl(model_id)
         params = dict(
             model_id=model_id,
             content=content,
