@@ -325,7 +325,6 @@ class JsonSchemaGenerator:
                 "$ref": f"{self.options.definitions_path}{python_type_to_name(data_type)}"
             }
 
-        # Add current type to seen types if it's a class
         if isinstance(data_type, type):
             _seen_types.add(data_type)
 
@@ -415,7 +414,7 @@ class JsonSchemaGenerator:
 
         origin_type = typing.get_origin(typ)
         if origin_type is list:
-            (list_type,) = typing.get_args(typ)
+            (list_type,) = typing.get_args(typ)  # unpack single tuple element
             return {
                 "type": "array",
                 "items": self.type_to_schema(list_type, _seen_types=_seen_types),
