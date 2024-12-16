@@ -29,6 +29,7 @@ from typing import (
     Literal,
     Optional,
     overload,
+    Set,
     Tuple,
     Type,
     TypeVar,
@@ -302,14 +303,31 @@ class JsonSchemaGenerator:
             # not a simple type
             return None
 
-    def type_to_schema(self, data_type: TypeLike, force_expand: bool = False) -> Schema:
+    def type_to_schema(
+        self,
+        data_type: TypeLike,
+        force_expand: bool = False,
+        _seen_types: Optional[Set[type]] = None,
+    ) -> Schema:
         """
         Returns the JSON schema associated with a type.
 
         :param data_type: The Python type whose JSON schema to return.
         :param force_expand: Forces a JSON schema to be returned even if the type is registered in the catalog of known types.
+        :param _seen_types: Internal parameter to track recursive types.
         :returns: The JSON schema associated with the type.
         """
+        if _seen_types is None:
+            _seen_types = set()
+
+        if isinstance(data_type, type) and data_type in _seen_types:
+            return {
+                "$ref": f"{self.options.definitions_path}{python_type_to_name(data_type)}"
+            }
+
+        # Add current type to seen types if it's a class
+        if isinstance(data_type, type):
+            _seen_types.add(data_type)
 
         # short-circuit for common simple types
         schema = self._simple_type_to_schema(data_type)
@@ -397,8 +415,11 @@ class JsonSchemaGenerator:
 
         origin_type = typing.get_origin(typ)
         if origin_type is list:
-            (list_type,) = typing.get_args(typ)  # unpack single tuple element
-            return {"type": "array", "items": self.type_to_schema(list_type)}
+            (list_type,) = typing.get_args(typ)
+            return {
+                "type": "array",
+                "items": self.type_to_schema(list_type, _seen_types=_seen_types),
+            }
         elif origin_type is dict:
             key_type, value_type = typing.get_args(typ)
             if not (key_type is str or key_type is int or is_type_enum(key_type)):
@@ -485,9 +506,13 @@ class JsonSchemaGenerator:
 
             if is_type_optional(property_type):
                 optional_type: type = unwrap_optional_type(property_type)
-                property_def = self.type_to_schema(optional_type)
+                property_def = self.type_to_schema(
+                    optional_type, _seen_types=_seen_types
+                )
             else:
-                property_def = self.type_to_schema(property_type)
+                property_def = self.type_to_schema(
+                    property_type, _seen_types=_seen_types
+                )
                 required.append(output_name)
 
             # check if attribute has a default value initializer
