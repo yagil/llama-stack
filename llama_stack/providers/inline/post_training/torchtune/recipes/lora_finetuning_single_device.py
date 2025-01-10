@@ -7,6 +7,7 @@
 import logging
 import os
 import time
+from datetime import datetime
 from functools import partial
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
@@ -136,6 +137,7 @@ class LoraFinetuningSingleDevice:
         self.global_step = 0
 
         self._gradient_accumulation_steps = training_config.gradient_accumulation_steps
+        self.max_validation_steps = training_config.max_validation_steps
 
         self._clip_grad_norm = 1.0
         self._enable_activation_checkpointing = (
@@ -582,7 +584,7 @@ class LoraFinetuningSingleDevice:
         log.info("Starting validation...")
         pbar = tqdm(total=len(self._validation_dataloader))
         for idx, batch in enumerate(self._validation_dataloader):
-            if idx == 10:
+            if idx == self.max_validation_steps:
                 break
             torchtune_utils.batch_to_device(batch, self._device)
 

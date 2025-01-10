@@ -6,15 +6,14 @@
 
 from typing import Optional
 
+from llama_models.schema_utils import json_schema_type
 from pydantic import BaseModel, Field
 
 
-class BraveSearchToolConfig(BaseModel):
+@json_schema_type
+class GroqConfig(BaseModel):
     api_key: Optional[str] = Field(
+        # The Groq client library loads the GROQ_API_KEY environment variable by default
         default=None,
-        description="The Brave Search API Key",
-    )
-    max_results: int = Field(
-        default=3,
-        description="The maximum number of results to return",
+        description="The Groq API key",
     )

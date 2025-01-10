@@ -12,7 +12,6 @@ from typing import Any, Dict, Optional
 
 import pkg_resources
 import yaml
-
 from termcolor import colored
 
 from llama_stack.apis.agents import Agents
@@ -33,13 +32,12 @@ from llama_stack.apis.scoring_functions import ScoringFunctions
 from llama_stack.apis.shields import Shields
 from llama_stack.apis.synthetic_data_generation import SyntheticDataGeneration
 from llama_stack.apis.telemetry import Telemetry
-
+from llama_stack.apis.tools import ToolGroups, ToolRuntime
 from llama_stack.distribution.datatypes import StackRunConfig
 from llama_stack.distribution.distribution import get_provider_registry
 from llama_stack.distribution.resolver import ProviderRegistry, resolve_impls
 from llama_stack.distribution.store.registry import create_dist_registry
 from llama_stack.providers.datatypes import Api
-
 
 log = logging.getLogger(__name__)
 
@@ -65,6 +63,8 @@ class LlamaStack(
     Models,
     Shields,
     Inspect,
+    ToolGroups,
+    ToolRuntime,
 ):
     pass
 
@@ -81,6 +81,7 @@ RESOURCES = [
         "list_scoring_functions",
     ),
     ("eval_tasks", Api.eval_tasks, "register_eval_task", "list_eval_tasks"),
+    ("tool_groups", Api.tool_groups, "register_tool_group", "list_tool_groups"),
 ]
 
 
@@ -110,6 +111,26 @@ class EnvVarError(Exception):
         super().__init__(
             f"Environment variable '{var_name}' not set or empty{f' at {path}' if path else ''}"
         )
+
+
+def redact_sensitive_fields(data: Dict[str, Any]) -> Dict[str, Any]:
+    """Redact sensitive information from config before printing."""
+    sensitive_patterns = ["api_key", "api_token", "password", "secret"]
+
+    def _redact_dict(d: Dict[str, Any]) -> Dict[str, Any]:
+        result = {}
+        for k, v in d.items():
+            if isinstance(v, dict):
+                result[k] = _redact_dict(v)
+            elif isinstance(v, list):
+                result[k] = [_redact_dict(i) if isinstance(i, dict) else i for i in v]
+            elif any(pattern in k.lower() for pattern in sensitive_patterns):
+                result[k] = "********"
+            else:
+                result[k] = v
+        return result
+
+    return _redact_dict(data)
 
 
 def replace_env_vars(config: Any, path: str = "") -> Any:
