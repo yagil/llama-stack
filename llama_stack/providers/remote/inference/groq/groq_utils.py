@@ -33,6 +33,9 @@ from llama_stack.apis.inference import (
     Message,
     StopReason,
 )
+from llama_stack.providers.utils.inference.openai_compat import (
+    get_sampling_strategy_options,
+)
 
 
 def convert_chat_completion_request(
@@ -62,6 +65,7 @@ def convert_chat_completion_request(
     if request.tools:
         warnings.warn("tools are not supported yet")
 
+    sampling_options = get_sampling_strategy_options(request.sampling_params)
     return CompletionCreateParams(
         model=request.model,
         messages=[_convert_message(message) for message in request.messages],
@@ -69,8 +73,8 @@ def convert_chat_completion_request(
         frequency_penalty=None,
         stream=request.stream,
         max_tokens=request.sampling_params.max_tokens or None,
-        temperature=request.sampling_params.temperature,
-        top_p=request.sampling_params.top_p,
+        temperature=sampling_options.get("temperature", 1.0),
+        top_p=sampling_options.get("top_p", 1.0),
     )
 
 

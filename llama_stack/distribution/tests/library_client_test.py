@@ -34,6 +34,7 @@ def main(config_path: str):
     response = client.inference.chat_completion(
         messages=[UserMessage(content="What is the capital of France?", role="user")],
         model_id=model_id,
+        sampling_params={"strategy": {"type": "greedy"}},
         stream=False,
     )
     print("\nChat completion response (non-stream):")
@@ -53,11 +54,7 @@ def main(config_path: str):
     agent_config = AgentConfig(
         model=model_id,
         instructions="You are a helpful assistant",
-        sampling_params={
-            "strategy": "greedy",
-            "temperature": 1.0,
-            "top_p": 0.9,
-        },
+        sampling_params={"strategy": {"type": "greedy"}},
         tools=(
             [
                 {
