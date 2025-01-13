@@ -30,13 +30,10 @@ from llama_stack.apis.telemetry import (
     Trace,
     UnstructuredLogEvent,
 )
-
 from llama_stack.distribution.datatypes import Api
-
 from llama_stack.providers.inline.telemetry.meta_reference.console_span_processor import (
     ConsoleSpanProcessor,
 )
-
 from llama_stack.providers.inline.telemetry.meta_reference.sqlite_span_processor import (
     SQLiteSpanProcessor,
 )
@@ -112,6 +109,7 @@ class TelemetryAdapter(TelemetryDatasetMixin, Telemetry):
 
     async def shutdown(self) -> None:
         trace.get_tracer_provider().force_flush()
+        trace.get_tracer_provider().shutdown()
 
     async def log_event(self, event: Event, ttl_seconds: int = 604800) -> None:
         if isinstance(event, UnstructuredLogEvent):
