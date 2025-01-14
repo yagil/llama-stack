@@ -200,6 +200,9 @@ class LlamaStackAsLibraryClient(LlamaStackClient):
 
         return asyncio.run(self.async_client.initialize())
 
+    def shutdown(self):
+        asyncio.run(self.async_client.shutdown())
+
     def _remove_root_logger_handlers(self):
         """
         Remove all handlers from the root logger. Needed to avoid polluting the console with logs.
