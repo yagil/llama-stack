@@ -97,7 +97,8 @@ def stream_across_asyncio_run_boundary(
     def run_async():
         # Run our own loop to avoid double async generator cleanup which is done
         # by asyncio.run()
-        loop = asyncio.get_event_loop()
+        loop = asyncio.new_event_loop()
+        # loop = asyncio.get_event_loop()
         asyncio.set_event_loop(loop)
         try:
             task = loop.create_task(consumer())
