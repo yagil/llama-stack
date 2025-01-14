@@ -76,23 +76,25 @@ def stream_across_asyncio_run_boundary(
     async def consumer():
         # make sure we make the generator in the event loop context
         gen = await async_gen_maker()
-        await start_trace(path, {"__location__": "library_client"})
-        if provider_data:
-            set_request_provider_data(
-                {"X-LlamaStack-Provider-Data": json.dumps(provider_data)}
-            )
-        try:
-            async for item in await gen:
-                result_queue.put(item)
-        except Exception as e:
-            print(f"Error in generator {e}")
-            result_queue.put(e)
-        except asyncio.CancelledError:
-            return
-        finally:
-            result_queue.put(StopIteration)
-            stop_event.set()
-            await end_trace()
+        # await start_trace(path, {"__location__": "library_client"})
+        # if provider_data:
+        #     set_request_provider_data(
+        #         {"X-LlamaStack-Provider-Data": json.dumps(provider_data)}
+        #     )
+        async for item in gen:
+            result_queue.put(item)
+        # try:
+        #     async for item in gen:
+        #         result_queue.put(item)
+        # except Exception as e:
+        #     print(f"Error in generator {e}")
+        #     result_queue.put(e)
+        # except asyncio.CancelledError:
+        #     return
+        # finally:
+        #     result_queue.put(StopIteration)
+        #     stop_event.set()
+        #     await end_trace()
 
     def run_async():
         # Run our own loop to avoid double async generator cleanup which is done
@@ -120,6 +122,9 @@ def stream_across_asyncio_run_boundary(
             try:
                 item = result_queue.get(timeout=0.1)
                 if item is StopIteration:
+                    break
+                if isinstance(item, GeneratorExit):
+                    print("GeneratorExit in stream_across_asyncio_run_boundary")
                     break
                 if isinstance(item, Exception):
                     raise item
@@ -230,19 +235,66 @@ class LlamaStackAsLibraryClient(LlamaStackClient):
     def request(self, *args, **kwargs):
         path = self._get_path(*args, **kwargs)
         if kwargs.get("stream"):
-            print("request stream")
-            async_response = asyncio.run(self.async_client.request(*args, **kwargs))
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
 
-            async def iterate():
-                async for chunk in async_response:
-                    yield chunk
+            async_stream = loop.run_until_complete(
+                self.async_client.request(*args, **kwargs)
+            )
 
-            return asyncio.run(self._aiter_to_iter(iterate()))
+            def sync_generator():
+                try:
+                    while True:
+                        chunk = loop.run_until_complete(async_stream.__anext__())
+                        yield chunk
+                except StopAsyncIteration:
+                    pass
+                finally:
+                    loop.close()
+
+            return sync_generator()
+            # async_response = self.async_client.request(*args, **kwargs)
+            # _loop = asyncio.new_event_loop()
+            # _thr = threading.Thread(
+            #     target=_loop.run_forever, name="Async Runner", daemon=True
+            # )
+            # if not _thr.is_alive():
+            #     _thr.start()
+
+            # future = asyncio.run_coroutine_threadsafe(async_response, _loop)
+            # future_result = future.result()
+            # async for chunk in future_result:
+            #     yield chunk
+            # # def sync_generator():
+            # #     while True:
+            # #         try:
+            # #             # Get next item from the AsyncStream
+            # #             async def get_next():
+            # #                 return await future_result.__anext__()
+
+            # #             print("get_next", get_next)
+            # #             chunk = asyncio.run(get_next())
+            # #             yield chunk
+            # #         except StopAsyncIteration:
+            # #             print("StopAsyncIteration in sync_generator")
+            # #             break
+
+            # # return sync_generator()
+            # print("future", future)
+            # print("future.result()", future_result)
+            # return future_result
+
+            # print("request stream")
+            # async_response = asyncio.run(self.async_client.request(*args, **kwargs))
+
+            # async def iterate():
+            #     async for chunk in async_response:
+            #         yield chunk
+
+            # return asyncio.run(self._aiter_to_iter(iterate()))
             # for chunk in asyncio.run(self._aiter_to_iter(iterate())):
             #     yield chunk
             # print("request stream")
-            # async_client_response = self.async_client.request(*args, **kwargs)
-            # print("async_client_response", async_client_response)
             # return stream_across_asyncio_run_boundary(
             #     lambda: self.async_client.request(*args, **kwargs),
             #     self.pool_executor,

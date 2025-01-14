@@ -1,0 +1,82 @@
+gen
+[36mAssistant> [0macreate_streaming
+PoolByteStream __aiter__   File "/opt/anaconda3/envs/fresh/lib/python3.11/threading.py", line 1002, in _bootstrap
+    self._bootstrap_inner()
+  File "/opt/anaconda3/envs/fresh/lib/python3.11/threading.py", line 1045, in _bootstrap_inner
+    self.run()
+  File "/opt/anaconda3/envs/fresh/lib/python3.11/site-packages/ipykernel/ipkernel.py", line 766, in run_closure
+    _threading_Thread_run(self)
+  File "/opt/anaconda3/envs/fresh/lib/python3.11/threading.py", line 982, in run
+    self._target(*self._args, **self._kwargs)
+  File "/opt/anaconda3/envs/fresh/lib/python3.11/concurrent/futures/thread.py", line 83, in _worker
+    work_item.run()
+  File "/opt/anaconda3/envs/fresh/lib/python3.11/concurrent/futures/thread.py", line 58, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "/Users/xiyan/Desktop/meta-llama/llama-stack/llama_stack/distribution/library_client.py", line 98, in run_async
+    loop.run_until_complete(task)
+  File "/opt/anaconda3/envs/fresh/lib/python3.11/site-packages/nest_asyncio.py", line 92, in run_until_complete
+    self._run_once()
+  File "/opt/anaconda3/envs/fresh/lib/python3.11/site-packages/nest_asyncio.py", line 133, in _run_once
+    handle._run()
+  File "/opt/anaconda3/envs/fresh/lib/python3.11/asyncio/events.py", line 84, in _run
+    self._context.run(self._callback, *self._args)
+  File "/opt/anaconda3/envs/fresh/lib/python3.11/asyncio/tasks.py", line 360, in __wakeup
+    self.__step()
+  File "/opt/anaconda3/envs/fresh/lib/python3.11/asyncio/tasks.py", line 277, in __step
+    result = coro.send(None)
+  File "/Users/xiyan/Desktop/meta-llama/llama-stack/llama_stack/distribution/library_client.py", line 79, in consumer
+    async for item in await gen:
+  File "/opt/anaconda3/envs/fresh/lib/python3.11/site-packages/llama_stack_client/_streaming.py", line 108, in __aiter__
+    async for item in self._iterator:
+  File "/opt/anaconda3/envs/fresh/lib/python3.11/site-packages/llama_stack_client/_streaming.py", line 121, in __stream__
+    async for sse in iterator:
+  File "/opt/anaconda3/envs/fresh/lib/python3.11/site-packages/llama_stack_client/_streaming.py", line 112, in _iter_events
+    async for sse in self._decoder.aiter_bytes(self.response.aiter_bytes()):
+  File "/opt/anaconda3/envs/fresh/lib/python3.11/site-packages/llama_stack_client/_streaming.py", line 225, in aiter_bytes
+    async for chunk in self._aiter_chunks(iterator):
+  File "/opt/anaconda3/envs/fresh/lib/python3.11/site-packages/llama_stack_client/_streaming.py", line 236, in _aiter_chunks
+    async for chunk in iterator:
+  File "/opt/anaconda3/envs/fresh/lib/python3.11/site-packages/httpx/_models.py", line 997, in aiter_bytes
+    async for raw_bytes in self.aiter_raw():
+  File "/opt/anaconda3/envs/fresh/lib/python3.11/site-packages/httpx/_models.py", line 1055, in aiter_raw
+    async for raw_stream_bytes in self.stream:
+  File "/opt/anaconda3/envs/fresh/lib/python3.11/site-packages/httpx/_content.py", line 88, in __aiter__
+    async for part in self._stream:
+  File "/Users/xiyan/Desktop/meta-llama/llama-stack/llama_stack/distribution/library_client.py", line 392, in gen
+    async for chunk in await func(**body):
+  File "/Users/xiyan/Desktop/meta-llama/llama-stack/llama_stack/distribution/routers/routers.py", line 154, in <genexpr>
+    return (chunk async for chunk in await provider.chat_completion(**params))
+  File "/Users/xiyan/Desktop/meta-llama/llama-stack/llama_stack/providers/remote/inference/fireworks/fireworks.py", line 247, in _stream_chat_completion
+    async for chunk in process_chat_completion_stream_response(
+  File "/Users/xiyan/Desktop/meta-llama/llama-stack/llama_stack/providers/utils/inference/openai_compat.py", line 171, in process_chat_completion_stream_response
+    async for chunk in stream:
+  File "/Users/xiyan/Desktop/meta-llama/llama-stack/llama_stack/providers/remote/inference/fireworks/fireworks.py", line 242, in _to_async_generator
+    async for chunk in stream:
+  File "/opt/anaconda3/envs/fresh/lib/python3.11/site-packages/fireworks/client/base_completion.py", line 207, in _acreate_streaming
+    async for event in _parse_sse_async(response, cls.stream_response_class):
+  File "/opt/anaconda3/envs/fresh/lib/python3.11/site-packages/fireworks/client/base_completion.py", line 19, in _parse_sse_async
+    async for line in lines:
+  File "/opt/anaconda3/envs/fresh/lib/python3.11/site-packages/fireworks/client/api_client.py", line 179, in post_request_async_streaming
+    async for sse in event_source.aiter_sse():
+  File "/opt/anaconda3/envs/fresh/lib/python3.11/site-packages/httpx_sse/_api.py", line 39, in aiter_sse
+    async for line in self._response.aiter_lines():
+  File "/opt/anaconda3/envs/fresh/lib/python3.11/site-packages/httpx/_models.py", line 1031, in aiter_lines
+    async for text in self.aiter_text():
+  File "/opt/anaconda3/envs/fresh/lib/python3.11/site-packages/httpx/_models.py", line 1018, in aiter_text
+    async for byte_content in self.aiter_bytes():
+  File "/opt/anaconda3/envs/fresh/lib/python3.11/site-packages/httpx/_models.py", line 997, in aiter_bytes
+    async for raw_bytes in self.aiter_raw():
+  File "/opt/anaconda3/envs/fresh/lib/python3.11/site-packages/httpx/_models.py", line 1055, in aiter_raw
+    async for raw_stream_bytes in self.stream:
+  File "/opt/anaconda3/envs/fresh/lib/python3.11/site-packages/httpx/_client.py", line 176, in __aiter__
+    async for chunk in self._stream:
+  File "/opt/anaconda3/envs/fresh/lib/python3.11/site-packages/httpx/_transports/default.py", line 271, in __aiter__
+    async for part in self._httpcore_stream:
+  File "/opt/anaconda3/envs/fresh/lib/python3.11/site-packages/httpcore/_async/connection_pool.py", line 404, in __aiter__
+    stack_trace = "".join(traceback.format_stack())
+
+[33mHere[0m[33m's a two-sentence poem about llamas:
+
+Softly roaming[0m[33m, gentle soul,
+With fur so fluffy, our llama's[0mGeneratorExit in _acreate_streaming: , do not raise[33m goal.[0m
+[97m[0m
