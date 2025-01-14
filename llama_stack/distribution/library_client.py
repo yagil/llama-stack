@@ -97,7 +97,7 @@ def stream_across_asyncio_run_boundary(
     def run_async():
         # Run our own loop to avoid double async generator cleanup which is done
         # by asyncio.run()
-        loop = asyncio.new_event_loop()
+        loop = asyncio.get_event_loop()
         asyncio.set_event_loop(loop)
         try:
             task = loop.create_task(consumer())
@@ -220,15 +220,34 @@ class LlamaStackAsLibraryClient(LlamaStackClient):
     ):
         return options.url
 
+    async def _aiter_to_iter(self, agen):
+        items = []
+        async for item in agen:
+            items.append(item)
+        return items
+
     def request(self, *args, **kwargs):
         path = self._get_path(*args, **kwargs)
         if kwargs.get("stream"):
-            return stream_across_asyncio_run_boundary(
-                lambda: self.async_client.request(*args, **kwargs),
-                self.pool_executor,
-                path=path,
-                provider_data=self.provider_data,
-            )
+            print("request stream")
+            async_response = asyncio.run(self.async_client.request(*args, **kwargs))
+
+            async def iterate():
+                async for chunk in async_response:
+                    yield chunk
+
+            return asyncio.run(self._aiter_to_iter(iterate()))
+            # for chunk in asyncio.run(self._aiter_to_iter(iterate())):
+            #     yield chunk
+            # print("request stream")
+            # async_client_response = self.async_client.request(*args, **kwargs)
+            # print("async_client_response", async_client_response)
+            # return stream_across_asyncio_run_boundary(
+            #     lambda: self.async_client.request(*args, **kwargs),
+            #     self.pool_executor,
+            #     path=path,
+            #     provider_data=self.provider_data,
+            # )
         else:
 
             async def _traced_request():
@@ -330,7 +349,7 @@ class AsyncLlamaStackAsLibraryClient(AsyncLlamaStackClient):
             raise ValueError("Client not initialized")
 
         if stream:
-            return self._call_streaming(
+            return await self._call_streaming(
                 cast_to=cast_to,
                 options=options,
                 stream_cls=stream_cls,
