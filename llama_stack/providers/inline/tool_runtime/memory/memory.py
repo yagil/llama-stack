@@ -51,6 +51,9 @@ class MemoryToolRuntimeImpl(ToolsProtocolPrivate, ToolRuntime):
     async def initialize(self):
         pass
 
+    async def shutdown(self):
+        pass
+
     async def list_runtime_tools(
         self, tool_group_id: Optional[str] = None, mcp_endpoint: Optional[URL] = None
     ) -> List[ToolDef]:

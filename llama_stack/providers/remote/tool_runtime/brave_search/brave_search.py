@@ -35,6 +35,9 @@ class BraveSearchToolRuntimeImpl(
     async def register_tool(self, tool: Tool):
         pass
 
+    async def shutdown(self):
+        pass
+
     async def unregister_tool(self, tool_id: str) -> None:
         return
 

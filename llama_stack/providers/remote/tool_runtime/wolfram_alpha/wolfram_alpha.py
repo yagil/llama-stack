@@ -50,6 +50,9 @@ class WolframAlphaToolRuntimeImpl(
             )
         return provider_data.wolfram_alpha_api_key
 
+    async def shutdown(self):
+        pass
+
     async def list_runtime_tools(
         self, tool_group_id: Optional[str] = None, mcp_endpoint: Optional[URL] = None
     ) -> List[ToolDef]:

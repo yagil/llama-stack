@@ -33,6 +33,9 @@ class BingSearchToolRuntimeImpl(
     async def initialize(self):
         pass
 
+    async def shutdown(self):
+        pass
+
     async def register_tool(self, tool: Tool):
         pass
 

@@ -346,7 +346,8 @@ class AsyncLlamaStackAsLibraryClient(AsyncLlamaStackClient):
 
     async def shutdown(self):
         for impl in self.impls.values():
-            await impl.shutdown()
+            if hasattr(impl, "shutdown"):
+                await impl.shutdown()
 
     async def _call_non_streaming(
         self,

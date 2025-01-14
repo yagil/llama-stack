@@ -38,6 +38,9 @@ class TavilySearchToolRuntimeImpl(
     async def unregister_tool(self, tool_id: str) -> None:
         return
 
+    async def shutdown(self):
+        pass
+
     def _get_api_key(self) -> str:
         if self.config.api_key:
             return self.config.api_key
