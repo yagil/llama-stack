@@ -25,8 +25,8 @@ Llama Stack defines and standardizes the core building blocks that simplify AI a
 
 ### Llama Stack Benefits
 - **Flexible Options**: Developers can choose their preferred infrastructure without changing APIs and enjoy flexible deployment choice.
-- **Consistent Experience**: With its unified APIs Llama Stack makes it easier to build, test, and deploy AI applications with consistent application behavior.
-- **Robust Ecosystem**: Llama Stack is already integrated with distribution partners (cloud providers, hardware vendors, and AI-focused companies) that offer tailored infrastructure, software, and services for deploying Llama models.
+- **Consistent Experience**: With unified APIs, Llama Stack makes it easier to build, test, and deploy AI applications across multiple AI service providers ensuring consistent application behavior.
+- **Robust Ecosystem**: Llama Stack is already integrated with distribution partners (cloud providers, hardware vendors, and AI-focused companies) that offer tailored infrastructure, software, and services for deploying Llama models and applications.
 
 By reducing friction and complexity, Llama Stack empowers developers to focus on what they do best: building transformative generative AI applications.
 
