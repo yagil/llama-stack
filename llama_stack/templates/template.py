@@ -58,9 +58,9 @@ class RunConfigSettings(BaseModel):
                     )
 
                 config_class = provider_registry[api][provider_type].config_class
-                assert (
-                    config_class is not None
-                ), f"No config class for provider type: {provider_type} for API: {api_str}"
+                assert config_class is not None, (
+                    f"No config class for provider type: {provider_type} for API: {api_str}"
+                )
 
                 config_class = instantiate_class_type(config_class)
                 if hasattr(config_class, "sample_run_config"):
@@ -137,7 +137,12 @@ class DistributionTemplate(BaseModel):
 
         template = self.template_path.read_text()
         # Render template with rich-generated table
-        env = jinja2.Environment(trim_blocks=True, lstrip_blocks=True)
+        env = jinja2.Environment(
+            trim_blocks=True,
+            lstrip_blocks=True,
+            # NOTE: autoescape is required to prevent XSS attacks
+            autoescape=True,
+        )
         template = env.from_string(template)
         return template.render(
             name=self.name,
