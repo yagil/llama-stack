@@ -4,6 +4,7 @@
 # This source code is licensed under the terms described in the LICENSE file in
 # the root directory of this source tree.
 
+import time
 from typing import Any, AsyncGenerator, Dict, List, Optional
 
 from llama_models.llama3.api.chat_format import ChatFormat
@@ -40,7 +41,7 @@ from llama_stack.apis.scoring import (
     ScoringFnParams,
 )
 from llama_stack.apis.shields import Shield
-from llama_stack.apis.telemetry import TokenUsage
+from llama_stack.apis.telemetry import MetricEvent, Telemetry, TokenUsage
 from llama_stack.apis.tools import (
     RAGDocument,
     RAGQueryConfig,
@@ -51,6 +52,7 @@ from llama_stack.apis.tools import (
 )
 from llama_stack.apis.vector_io import Chunk, QueryChunksResponse, VectorIO
 from llama_stack.providers.datatypes import RoutingTable
+from llama_stack.providers.utils.telemetry.tracing import get_current_span
 
 
 class VectorIORouter(VectorIO):
@@ -107,8 +109,10 @@ class InferenceRouter(Inference):
     def __init__(
         self,
         routing_table: RoutingTable,
+        telemetry: Telemetry,
     ) -> None:
         self.routing_table = routing_table
+        self.telemetry = telemetry
         self.tokenizer = Tokenizer.get_instance()
         self.formatter = ChatFormat(self.tokenizer)
 
@@ -193,6 +197,31 @@ class InferenceRouter(Inference):
                     total_tokens=total_tokens,
                 )
             )
+            # Log token usage metrics
+            metrics = [
+                ("prompt_tokens", prompt_tokens),
+                ("completion_tokens", completion_tokens),
+                ("total_tokens", total_tokens),
+            ]
+
+            span = get_current_span()
+            if span:
+                breakpoint()
+                for metric_name, value in metrics:
+                    await self.telemetry.log_event(
+                        MetricEvent(
+                            trace_id=span.trace_id,
+                            span_id=span.span_id,
+                            metric=metric_name,
+                            value=value,
+                            timestamp=time.time(),
+                            unit="tokens",
+                            attributes={
+                                "model_id": model_id,
+                                "provider_id": model.provider_id,
+                            },
+                        )
+                    )
             return response
 
     async def completion(
