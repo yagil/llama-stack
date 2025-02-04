@@ -13,8 +13,8 @@ from typing import (
     Literal,
     Optional,
     Protocol,
-    runtime_checkable,
     Union,
+    runtime_checkable,
 )
 
 from llama_models.schema_utils import json_schema_type, register_schema, webmethod
@@ -183,6 +183,28 @@ class QuerySpansResponse(BaseModel):
 
 class QuerySpanTreeResponse(BaseModel):
     data: Dict[str, SpanWithStatus]
+
+
+@json_schema_type
+class TokenUsage(BaseModel):
+    type: Literal["token_usage"] = "token_usage"
+    prompt_tokens: int
+    completion_tokens: int
+    total_tokens: int
+
+
+Metric = register_schema(
+    Annotated[
+        Union[TokenUsage],
+        Field(discriminator="type"),
+    ],
+    name="Metric",
+)
+
+
+@json_schema_type
+class MetricsMixin(BaseModel):
+    metrics: List[Metric] = Field(default_factory=list)
 
 
 @runtime_checkable
