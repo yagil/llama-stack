@@ -23,8 +23,10 @@ from llama_stack.apis.tools import (
     RAGToolRuntime,
     ToolDef,
     ToolInvocationResult,
+    ToolParameter,
     ToolRuntime,
 )
+from pydantic import TypeAdapter
 from llama_stack.apis.vector_io import QueryChunksResponse, VectorIO
 from llama_stack.providers.datatypes import ToolsProtocolPrivate
 from llama_stack.providers.utils.memory.vector_store import (
@@ -151,21 +153,37 @@ class MemoryToolRuntimeImpl(ToolsProtocolPrivate, ToolRuntime, RAGToolRuntime):
     async def list_runtime_tools(
         self, tool_group_id: Optional[str] = None, mcp_endpoint: Optional[URL] = None
     ) -> List[ToolDef]:
-        # Parameters are not listed since these methods are not yet invoked automatically
-        # by the LLM. The method is only implemented so things like /tools can list without
-        # encountering fatals.
         return [
             ToolDef(
-                name="query_from_memory",
-                description="Retrieve context from memory",
-            ),
-            ToolDef(
-                name="insert_into_memory",
-                description="Insert documents into memory",
-            ),
+                name="search",
+                description="Search for information in a database",
+                parameters=[
+                    ToolParameter(
+                        name="query",
+                        description="The query to search for. Can be a natural language sentence or keywords.",
+                        parameter_type="string",
+                    ),
+                ],
+            )
         ]
 
     async def invoke_tool(self, tool_name: str, kwargs: Dict[str, Any]) -> ToolInvocationResult:
-        raise RuntimeError(
-            "This toolgroup should not be called generically but only through specific methods of the RAGToolRuntime protocol"
+        vector_db_ids = kwargs.get("vector_db_ids", [])
+        query_config = kwargs.get("query_config")
+        if query_config:
+            query_config = TypeAdapter(RAGQueryConfig).validate_python(query_config)
+        else:
+            # handle someone passing an empty dict
+            query_config = RAGQueryConfig()
+
+        query = kwargs["query"]
+        result = await self.query(
+            content=query,
+            vector_db_ids=vector_db_ids,
+            query_config=query_config,
+        )
+        retrieved_context = result.content
+
+        return ToolInvocationResult(
+            content=retrieved_context,
         )
