@@ -6,17 +6,16 @@
 
 from llama_stack.apis.inference import Inference
 
-from .config import LMSTUDIOConfig
+from .config import LMStudioImplConfig
 
-
-async def get_adapter_impl(config: LMSTUDIOConfig, _deps) -> Inference:
+async def get_adapter_impl(config: LMStudioImplConfig, _deps) -> Inference:
     # import dynamically so `llama stack build` does not fail due to missing dependencies
-    from .lmstudio import LMSTUDIOInferenceAdapter
+    from .lmstudio import LMStudioInferenceAdapter
 
-    if not isinstance(config, LMSTUDIOConfig):
+    if not isinstance(config, LMStudioImplConfig):
         raise RuntimeError(f"Unexpected config type: {type(config)}")
-    adapter = LMSTUDIOInferenceAdapter(config)
+    adapter = LMStudioInferenceAdapter(config)
     return adapter
 
 
-__all__ = ["get_adapter_impl", "LMSTUDIOConfig"]
+__all__ = ["get_adapter_impl", "LMStudioImplConfig"]
