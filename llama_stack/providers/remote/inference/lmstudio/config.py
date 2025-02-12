@@ -8,15 +8,13 @@ from typing import Any, Dict
 
 from pydantic import BaseModel
 
+DEFAULT_LMSTUDIO_URL = "http://localhost:1234"
 
-DEFAULT_LMSTUDIO_URL = "http://localhost:12345"
-
-
-class LMSTUDIOImplConfig(BaseModel):
+class LMStudioImplConfig(BaseModel):
     url: str = DEFAULT_LMSTUDIO_URL
 
     @classmethod
     def sample_run_config(
-        cls, url: str = "${env.LMSTUDIO_URL:http://localhost:12345}", **kwargs
+        cls, url: str = "${env.LMSTUDIO_URL:http://localhost:1234}", **kwargs
     ) -> Dict[str, Any]:
         return {"url": url}
