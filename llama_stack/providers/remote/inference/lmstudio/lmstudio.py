@@ -1,8 +1,11 @@
 import lmstudio as lms
-from lmstudio import LlmPredictionConfigDict
-from llama_stack.apis.common.content_types import InterleavedContentItem
+from lmstudio import Chat, LlmPredictionConfigDict, PredictionResult
+from llama_stack.apis.common.content_types import (
+    InterleavedContentItem,
+)
 from llama_stack.apis.inference.inference import (
     ChatCompletionResponseStreamChunk,
+    CompletionMessage,
     CompletionResponse,
     CompletionResponseStreamChunk,
 )
@@ -16,9 +19,7 @@ from llama_stack.providers.datatypes import ModelsProtocolPrivate
 from llama_stack.apis.inference import Inference
 from typing import AsyncGenerator, AsyncIterator, List, Literal, Optional, Union
 from llama_stack.apis.inference import (
-    ChatCompletionRequest,
     ChatCompletionResponse,
-    CompletionRequest,
     EmbeddingsResponse,
     EmbeddingTaskType,
     Inference,
@@ -110,6 +111,32 @@ class LmstudioInferenceAdapter(Inference, ModelsProtocolPrivate):
 
         return EmbeddingsResponse(embeddings=embeddings)
 
+    def _convert_message_list_to_lmstudio_chat(self, messages: List[Message]) -> Chat:
+        chat = Chat()
+        for message in messages:
+            if content_has_media(message.content):
+                # TODO: Support images and other media
+                continue
+            if message.role == "user":
+                chat.add_user_message(interleaved_content_as_str(message.content))
+            elif message.role == "system":
+                chat.add_system_prompt(interleaved_content_as_str(message.content))
+            else:
+                chat.add_assistant_response(interleaved_content_as_str(message.content))
+        return chat
+
+    def _convert_prediction_to_chat_response(
+        self, result: PredictionResult
+    ) -> ChatCompletionResponse:
+        response = ChatCompletionResponse(
+            completion_message=CompletionMessage(
+                content=result.content,
+                stop_reason=self._get_stop_reason(result.stats.stop_reason),
+                tool_calls=None,
+            )
+        )
+        return response
+
     async def chat_completion(
         self,
         model_id: str,
@@ -125,11 +152,19 @@ class LmstudioInferenceAdapter(Inference, ModelsProtocolPrivate):
     ) -> Union[
         ChatCompletionResponse, AsyncIterator[ChatCompletionResponseStreamChunk]
     ]:
-
-        llm: lms.LLM = await asyncio.to_thread(self.client.llm.model(model_id))
-        text_content = [message.content.text for message in messages]
-        res = await asyncio.to_thread(llm.respond, text_content)
-        return res
+        model = await self.model_store.get_model(model_id)
+        llm: lms.LLM = await asyncio.to_thread(
+            self.client.llm.model, model.provider_model_id
+        )
+        chat = self._convert_message_list_to_lmstudio_chat(messages)
+        config = self._get_completion_config_from_params(
+            sampling_params, response_format
+        )
+        if stream:
+            pass
+        else:
+            response = await asyncio.to_thread(llm.respond, history=chat, config=config)
+            return self._convert_prediction_to_chat_response(response)
 
     def _get_completion_config_from_params(
         self,
@@ -153,8 +188,12 @@ class LmstudioInferenceAdapter(Inference, ModelsProtocolPrivate):
                 raise ValueError(f"Unsupported sampling strategy: {params.strategy}")
             options.update(
                 {
-                    "maxTokens": params.max_tokens,
-                    "repetitionPenalty": params.repetition_penalty,
+                    "maxTokens": params.max_tokens if params.max_tokens != 0 else None,
+                    "repetitionPenalty": (
+                        params.repetition_penalty
+                        if params.repetition_penalty != 0
+                        else None
+                    ),
                 }
             )
         if response_format is not None:
@@ -197,6 +236,11 @@ class LmstudioInferenceAdapter(Inference, ModelsProtocolPrivate):
             sampling_params, response_format
         )
         llm = await asyncio.to_thread(self.client.llm.model, model.provider_model_id)
+
+        # TODO: See if we can support this
+        assert not content_has_media(
+            content
+        ), "Media content not supported in completion in LM Studio"
         if stream:
             pass
         else:
