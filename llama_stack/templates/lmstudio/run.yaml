@@ -15,7 +15,7 @@ providers:
   - provider_id: lmstudio
     provider_type: remote::lmstudio
     config:
-      base_url: localhost:1234
+      url: localhost:1234
   safety:
   - provider_id: llama-guard
     provider_type: inline::llama-guard
@@ -100,12 +100,12 @@ metadata_store:
   db_path: ${env.SQLITE_STORE_DIR:~/.llama/distributions/lmstudio}/registry.db
 models:
 - metadata: {}
-  model_id: meta-llama/Llama-3.1-8B-Instruct
+  model_id: lmstudio-community/meta-llama-3.1-8b-instruct
   provider_id: lmstudio
   provider_model_id: lmstudio-community/meta-llama-3.1-8b-instruct
   model_type: llm
 - metadata: {}
-  model_id: llama-3.2-3b
+  model_id: lmstudio-community/llama-3.2-3b-instruct
   provider_id: lmstudio
   provider_model_id: lmstudio-community/llama-3.2-3b-instruct
   model_type: llm
@@ -114,6 +114,7 @@ models:
     context_length: 2048
   model_id: text-embedding-nomic-embed-text-v1.5
   provider_id: lmstudio
+  provider_model_id: text-embedding-nomic-embed-text-v1.5
   model_type: embedding
 shields: []
 vector_dbs: []
