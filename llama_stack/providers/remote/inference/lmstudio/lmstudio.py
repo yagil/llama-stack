@@ -5,6 +5,7 @@ from llama_stack.apis.inference.inference import (
     ChatCompletionResponseStreamChunk,
     CompletionResponse,
     CompletionResponseStreamChunk,
+    ResponseFormatType,
 )
 from llama_stack.providers.datatypes import ModelsProtocolPrivate
 from llama_stack.apis.inference import Inference
@@ -105,9 +106,15 @@ class LMStudioInferenceAdapter(Inference, ModelsProtocolPrivate):
     ]:
         model = await self.model_store.get_model(model_id)
         llm = await self.client.get_llm(model.provider_model_id)
-        
+
+        if response_format is not None and response_format.type != ResponseFormatType.json_schema.value:
+            raise ValueError(
+                f"Response format type {response_format.type} not supported for LM Studio"
+            )
+        json_schema = response_format.json_schema if response_format else None
+
         return await self.client.llm_respond(
-            llm, messages, sampling_params, response_format, stream
+            llm, messages, sampling_params, json_schema, stream
         )
     async def completion(
         self,
@@ -127,6 +134,12 @@ class LMStudioInferenceAdapter(Inference, ModelsProtocolPrivate):
             content
         ), "Media content not supported in completion in LM Studio"
 
+        if response_format is not None and response_format.type != ResponseFormatType.json_schema.value:
+            raise ValueError(
+                f"Response format type {response_format.type} not supported for LM Studio"
+            )
+        json_schema = response_format.json_schema if response_format else None
+
         return await self.client.llm_completion(
-            llm, content, sampling_params, response_format, stream
+            llm, content, sampling_params, json_schema, stream
         )
