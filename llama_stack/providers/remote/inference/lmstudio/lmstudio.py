@@ -40,9 +40,6 @@ from llama_stack.log import get_logger
 logger = get_logger(name=__name__, category="inference")
 
 
-
-
-
 class LMStudioInferenceAdapter(Inference, ModelsProtocolPrivate):
     def __init__(self, url: str) -> None:
         self.url = url
@@ -105,10 +102,16 @@ class LMStudioInferenceAdapter(Inference, ModelsProtocolPrivate):
     ]:
         model = await self.model_store.get_model(model_id)
         llm = await self.client.get_llm(model.provider_model_id)
-        
         return await self.client.llm_respond(
-            llm, messages, sampling_params, response_format, stream
+            llm=llm,
+            messages=messages,
+            sampling_params=sampling_params,
+            response_format=response_format,
+            stream=stream,
+            tool_config=tool_config,
+            tools=tools,
         )
+
     async def completion(
         self,
         model_id: str,
