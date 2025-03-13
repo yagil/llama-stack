@@ -105,12 +105,10 @@ class LMStudioInferenceAdapter(Inference, ModelsProtocolPrivate):
     ]:
         model = await self.model_store.get_model(model_id)
         llm = await self.client.get_llm(model.provider_model_id)
-        if stream:
-            pass
-        else:
-            return await self.client.llm_respond(
-                llm, messages, sampling_params, response_format
-            )
+        
+        return await self.client.llm_respond(
+            llm, messages, sampling_params, response_format, stream
+        )
 
     async def completion(
         self,

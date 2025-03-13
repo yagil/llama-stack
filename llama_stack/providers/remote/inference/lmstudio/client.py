@@ -4,11 +4,14 @@ import lmstudio as lms
 
 from llama_stack.apis.common.content_types import InterleavedContent
 from llama_stack.apis.inference.inference import (
+    ChatCompletionRequest,
     ChatCompletionResponse,
     CompletionMessage,
     CompletionResponse,
     Message,
     ResponseFormat,
+    ToolConfig,
+    ToolDefinition
 )
 from llama_stack.models.llama.datatypes import (
     GreedySamplingStrategy,
@@ -17,10 +20,12 @@ from llama_stack.models.llama.datatypes import (
     TopKSamplingStrategy,
     TopPSamplingStrategy,
 )
+from llama_stack.providers.utils.inference.openai_compat import convert_openai_chat_completion_choice, convert_openai_chat_completion_stream
 from llama_stack.providers.utils.inference.prompt_adapter import (
     content_has_media,
     interleaved_content_as_str,
 )
+from openai import OpenAI
 
 LlmPredictionStopReason = Literal[
     "userStopped",
@@ -38,6 +43,7 @@ class LMStudioClient:
     def __init__(self, url: str) -> None:
         self.url = url
         self.sdk_client = lms.Client(self.url)
+        self.openai_client = OpenAI(base_url=url, api_key="garbagez")
 
     async def check_if_model_present_in_lmstudio(self, provider_model_id):
         models = await asyncio.to_thread(self.sdk_client.list_downloaded_models)
@@ -73,13 +79,31 @@ class LMStudioClient:
         messages: List[Message],
         sampling_params: Optional[SamplingParams] = None,
         response_format: Optional[ResponseFormat] = None,
+        stream: Optional[bool] = False,
+        tools: Optional[List[ToolDefinition]] = None,
+        tool_config: Optional[ToolConfig] = None,
     ) -> ChatCompletionResponse:
-        chat = self._convert_message_list_to_lmstudio_chat(messages)
-        config = self._get_completion_config_from_params(
-            sampling_params, response_format
-        )
-        response = await asyncio.to_thread(llm.respond, history=chat, config=config)
-        return self._convert_prediction_to_chat_response(response)
+        if tools is None or len(tools) == 0:
+            chat = self._convert_message_list_to_lmstudio_chat(messages)
+            config = self._get_completion_config_from_params(
+                sampling_params, response_format
+            )
+            response = await asyncio.to_thread(llm.respond, history=chat, config=config)
+            return self._convert_prediction_to_chat_response(response)
+        else:
+            request = ChatCompletionRequest(
+                messages=messages,
+                sampling_params=sampling_params,
+                response_format=response_format,
+                tools=tools or [],
+                tool_config=tool_config,
+                stream=stream,
+            )
+            response = self.openai_client.chat.completions.create(**request)
+            if stream:
+                return convert_openai_chat_completion_stream(response)
+            result = convert_openai_chat_completion_choice(response.choices[0])
+            return result
 
     async def llm_completion(
         self,
