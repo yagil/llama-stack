@@ -14,13 +14,13 @@ from llama_stack.providers.utils.inference.model_registry import (
 
 MODEL_ENTRIES = [
     ProviderModelEntry(
-        provider_model_id="meta-llama3.1-8b-instruct",
+        provider_model_id="lmstudio-community/meta-llama-3.1-8b-instruct",
         aliases=[],
         llama_model=CoreModelId.llama3_1_8b_instruct.value,
         model_type=ModelType.llm,
     ),
     ProviderModelEntry(
-        provider_model_id="llama-3.2-3b-instruct",
+        provider_model_id="lmstudio-community/llama-3.2-3b-instruct",
         aliases=[],
         llama_model=CoreModelId.llama3_2_3b_instruct.value,
         model_type=ModelType.llm,
@@ -29,7 +29,7 @@ MODEL_ENTRIES = [
 
     # embedding model
     ProviderModelEntry(
-        provider_model_id="nomic-embed-text-v1.5",
+        provider_model_id="text-embedding-nomic-embed-text-v1.5",
         provider_id="lmstudio",
         model_type=ModelType.embedding,
         metadata={
