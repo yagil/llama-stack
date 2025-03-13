@@ -79,9 +79,14 @@ class LmstudioInferenceAdapter(Inference, ModelsProtocolPrivate):
         model = await self.register_helper.register_model(model)
         models = await asyncio.to_thread(self.client.list_downloaded_models)
         model_ids = [m.model_key for m in models]
-        if model.provider_model_id not in model_ids:
-            raise ValueError(f"Model {model.provider_model_id} not found in LM Studio")
-        return model
+        if model.provider_model_id in model_ids:
+            return model
+
+        model_ids = [id.split("/")[-1] for id in model_ids]
+        if model.provider_model_id in model_ids:
+            return model
+
+        raise ValueError(f"Model {model.provider_model_id} not found in LM Studio")
 
     async def unregister_model(self, model_id):
         pass
