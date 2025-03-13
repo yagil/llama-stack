@@ -1,4 +1,5 @@
 import lmstudio as lms
+from lmstudio import SyncSessionEmbedding
 from llama_stack.apis.common.content_types import InterleavedContentItem
 from llama_stack.apis.inference.inference import (
     ChatCompletionResponseStreamChunk,
@@ -64,8 +65,7 @@ class LMStudioInferenceAdapter(Inference, ModelsProtocolPrivate):
 
     async def register_model(self, model):
         model = await self.register_helper.register_model(model)
-        models = await asyncio.to_thread(self.client.list_downloaded_models, 'llm')
-        print(models)
+        models = await asyncio.to_thread(self.client.list_downloaded_models)
         model_ids = [m.model_key for m in models]
         if model.provider_model_id not in model_ids:
             raise ValueError(f"Model {model.provider_model_id} not found in LM Studio")
@@ -82,14 +82,16 @@ class LMStudioInferenceAdapter(Inference, ModelsProtocolPrivate):
         output_dimension: Optional[int] = None,
         task_type: Optional[EmbeddingTaskType] = None,
     ) -> EmbeddingsResponse:
-        # model = self.model_store.get_model(model_id)
+        model = self.model_store.get_model(model_id)
 
         assert all(
             not content_has_media(content) for content in contents
-        ), "Media content not supported"
+        ), "Media content not supported in embedding model"
+        embedding_model = self.model_store.get_model(model_id)
+        model = await asyncio.to_thread(self.client.embedding.model, embedding_model.provider_model_id)
 
-        model = self.client.embedding.load_new_instance(model_id)
-        embeddings = await asyncio.to_thread(model.embed, contents)
+        embeddings = await asyncio.to_thread(model.embed, interleaved_content_as_str(contents))
+
         return EmbeddingsResponse(embeddings=embeddings)
 
     async def chat_completion(
