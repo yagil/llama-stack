@@ -249,4 +249,13 @@ def available_providers() -> List[ProviderSpec]:
                 provider_data_validator="llama_stack.providers.remote.inference.passthrough.PassthroughProviderDataValidator",
             ),
         ),
+        remote_provider_spec(
+            api=Api.inference,
+            adapter=AdapterSpec(
+                adapter_type="ollama",
+                pip_packages=["lmstudio"],
+                config_class="llama_stack.providers.remote.inference.lmstudio.LmstudioImplConfig",
+                module="llama_stack.providers.remote.inference.lmstudio",
+            ),
+        ),
     ]
