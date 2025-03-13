@@ -109,7 +109,6 @@ class LMStudioInferenceAdapter(Inference, ModelsProtocolPrivate):
         return await self.client.llm_respond(
             llm, messages, sampling_params, response_format, stream
         )
-
     async def completion(
         self,
         model_id: str,
@@ -127,9 +126,7 @@ class LMStudioInferenceAdapter(Inference, ModelsProtocolPrivate):
         assert not content_has_media(
             content
         ), "Media content not supported in completion in LM Studio"
-        if stream:
-            pass
-        else:
-            return await self.client.llm_completion(
-                llm, content, sampling_params, response_format
-            )
+
+        return await self.client.llm_completion(
+            llm, content, sampling_params, response_format, stream
+        )
