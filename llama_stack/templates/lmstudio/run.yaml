@@ -15,14 +15,12 @@ providers:
   - provider_id: lmstudio
     provider_type: remote::lmstudio
     config:
-      base_url: http://localhost:1234
-  - provider_id: sentence-transformers
-    provider_type: inline::sentence-transformers
-    config: {}
+      base_url: localhost:1234
   safety:
   - provider_id: llama-guard
     provider_type: inline::llama-guard
-    config: {}
+    config:
+      excluded_categories: []
   vector_io:
   - provider_id: faiss
     provider_type: inline::faiss
@@ -42,14 +40,26 @@ providers:
   eval:
   - provider_id: meta-reference
     provider_type: inline::meta-reference
-    config: {}
+    config:
+      kvstore:
+        type: sqlite
+        namespace: null
+        db_path: ${env.SQLITE_STORE_DIR:~/.llama/distributions/lmstudio}/meta_reference_eval.db
   datasetio:
   - provider_id: huggingface
     provider_type: remote::huggingface
-    config: {}
+    config:
+      kvstore:
+        type: sqlite
+        namespace: null
+        db_path: ${env.SQLITE_STORE_DIR:~/.llama/distributions/lmstudio}/huggingface_datasetio.db
   - provider_id: localfs
     provider_type: inline::localfs
-    config: {}
+    config:
+      kvstore:
+        type: sqlite
+        namespace: null
+        db_path: ${env.SQLITE_STORE_DIR:~/.llama/distributions/lmstudio}/localfs_datasetio.db
   scoring:
   - provider_id: basic
     provider_type: inline::basic
@@ -90,27 +100,18 @@ metadata_store:
   db_path: ${env.SQLITE_STORE_DIR:~/.llama/distributions/lmstudio}/registry.db
 models:
 - metadata: {}
-  model_id: llama3.1-8b
-  provider_id: lmstudio
-  provider_model_id: llama3.1-8b
-  model_type: llm
-- metadata: {}
   model_id: meta-llama/Llama-3.1-8B-Instruct
   provider_id: lmstudio
-  provider_model_id: llama3.1-8b
+  provider_model_id: meta-llama3.1-8b-instruct
   model_type: llm
 - metadata: {}
-  model_id: llama-3.3-70b
+  model_id: llama-3.2-3b
   provider_id: lmstudio
-  provider_model_id: llama-3.3-70b
-  model_type: llm
-- metadata: {}
-  model_id: meta-llama/Llama-3.3-70B-Instruct
-  provider_id: lmstudio
-  provider_model_id: llama-3.3-70b
+  provider_model_id: llama-3.2-3b-instruct
   model_type: llm
 - metadata:
     embedding_dimension: 768
+    context_length: 2048
   model_id: nomic-embed-text-v1.5
   provider_id: lmstudio
   model_type: embedding

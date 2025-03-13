@@ -1,5 +1,4 @@
 import lmstudio as lms
-from lmstudio import SyncSessionEmbedding
 from llama_stack.apis.common.content_types import InterleavedContentItem
 from llama_stack.apis.inference.inference import (
     ChatCompletionResponseStreamChunk,
@@ -41,7 +40,7 @@ from llama_stack.providers.utils.inference.prompt_adapter import (
     request_has_media,
 )
 
-from .models import model_entries
+from .models import MODEL_ENTRIES
 from llama_stack.providers.utils.inference.model_registry import ModelRegistryHelper
 import asyncio
 from llama_stack.log import get_logger
@@ -49,11 +48,11 @@ from llama_stack.log import get_logger
 logger = get_logger(name=__name__, category="inference")
 
 
-class LMStudioInferenceAdapter(Inference, ModelsProtocolPrivate):
+class LmstudioInferenceAdapter(Inference, ModelsProtocolPrivate):
     def __init__(self, url: str) -> None:
         self.url = url
         self.client = None
-        self.register_helper = ModelRegistryHelper(model_entries)
+        self.register_helper = ModelRegistryHelper(MODEL_ENTRIES)
 
     def _get_client(self) -> lms.Client:
         if self.client is None:
