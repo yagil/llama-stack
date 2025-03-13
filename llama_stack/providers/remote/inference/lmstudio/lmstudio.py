@@ -33,18 +33,12 @@ from llama_stack.apis.inference import (
     ToolPromptFormat,
 )
 from llama_stack.apis.common.content_types import (
-    ImageContentItem,
     InterleavedContent,
     InterleavedContentItem,
-    TextContentItem,
 )
 from llama_stack.providers.utils.inference.prompt_adapter import (
-    chat_completion_request_to_prompt,
-    completion_request_to_prompt,
     content_has_media,
-    convert_image_content_to_url,
     interleaved_content_as_str,
-    request_has_media,
 )
 
 from .models import MODEL_ENTRIES
@@ -132,11 +126,9 @@ class LmstudioInferenceAdapter(Inference, ModelsProtocolPrivate):
         ChatCompletionResponse, AsyncIterator[ChatCompletionResponseStreamChunk]
     ]:
 
-        llm: lms.LLM = await asyncio.to_thread(
-            self.client.llm.load_new_instance(model_id)
-        )
+        llm: lms.LLM = await asyncio.to_thread(self.client.llm.model(model_id))
         text_content = [message.content.text for message in messages]
-        res = await asyncio.to_thread(llm.respond(text_content))
+        res = await asyncio.to_thread(llm.respond, text_content)
         return res
 
     def _get_completion_config_from_params(
@@ -168,7 +160,12 @@ class LmstudioInferenceAdapter(Inference, ModelsProtocolPrivate):
         if response_format is not None:
             if response_format.type == "json_schema":
                 options.update(
-                    {"structured": {"type": "json", "schema": response_format.schema}}
+                    {
+                        "structured": {
+                            "type": "json",
+                            "jsonSchema": response_format.json_schema,
+                        }
+                    }
                 )
             elif response_format.type == "grammar":
                 raise NotImplementedError("Grammar response format is not supported")
@@ -191,9 +188,8 @@ class LmstudioInferenceAdapter(Inference, ModelsProtocolPrivate):
         sampling_params: Optional[SamplingParams] = None,
         response_format: Optional[ResponseFormat] = None,
         stream: Optional[bool] = False,
-        logprobs: Optional[LogProbConfig] = None, # Skip this for now
+        logprobs: Optional[LogProbConfig] = None,  # Skip this for now
     ) -> Union[CompletionResponse, AsyncIterator[CompletionResponseStreamChunk]]:
-
         if sampling_params is None:
             sampling_params = SamplingParams()
         model = await self.model_store.get_model(model_id)
@@ -205,9 +201,9 @@ class LmstudioInferenceAdapter(Inference, ModelsProtocolPrivate):
             pass
         else:
             response = await asyncio.to_thread(
-                llm.complete, interleaved_content_as_str(content), config
+                llm.complete, prompt=interleaved_content_as_str(content), config=config
             )
             return CompletionResponse(
                 content=response.content,
-                stop_reason=self._get_stop_reason(response.stopReason),
+                stop_reason=self._get_stop_reason(response.stats.stop_reason),
             )
