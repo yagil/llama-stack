@@ -47,7 +47,7 @@ from llama_stack.providers.utils.inference.prompt_adapter import (
     request_has_media,
 )
 
-from .models import model_entries
+from .models import MODEL_ENTRIES
 from llama_stack.providers.utils.inference.model_registry import ModelRegistryHelper
 import asyncio
 from llama_stack.log import get_logger
@@ -67,11 +67,11 @@ LlmPredictionStopReason = Literal[
 ]
 
 
-class LMStudioInferenceAdapter(Inference, ModelsProtocolPrivate):
+class LmstudioInferenceAdapter(Inference, ModelsProtocolPrivate):
     def __init__(self, url: str) -> None:
         self.url = url
         self.client = None
-        self.register_helper = ModelRegistryHelper(model_entries)
+        self.register_helper = ModelRegistryHelper(MODEL_ENTRIES)
 
     def _get_client(self) -> lms.Client:
         if self.client is None:

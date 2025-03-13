@@ -29,7 +29,7 @@ MODEL_ENTRIES = [
 
     # embedding model
     ProviderModelEntry(
-        model_id="nomic-embed-text-v1.5",
+        provider_model_id="nomic-embed-text-v1.5",
         provider_id="lmstudio",
         model_type=ModelType.embedding,
         metadata={
