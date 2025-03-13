@@ -252,7 +252,7 @@ def available_providers() -> List[ProviderSpec]:
         remote_provider_spec(
             api=Api.inference,
             adapter=AdapterSpec(
-                adapter_type="ollama",
+                adapter_type="lmstudio",
                 pip_packages=["lmstudio"],
                 config_class="llama_stack.providers.remote.inference.lmstudio.LmstudioImplConfig",
                 module="llama_stack.providers.remote.inference.lmstudio",
