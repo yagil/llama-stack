@@ -12,6 +12,7 @@ from llama_stack.apis.inference.inference import (
     CompletionMessage,
     CompletionResponse,
     CompletionResponseStreamChunk,
+    JsonSchemaResponseFormat,
     Message,
     ResponseFormat,
     ToolConfig,
@@ -87,7 +88,7 @@ class LMStudioClient:
         llm: lms.LLM,
         messages: List[Message],
         sampling_params: Optional[SamplingParams] = None,
-        response_format: Optional[ResponseFormat] = None,
+        json_schema: Optional[JsonSchemaResponseFormat] = None,
         stream: Optional[bool] = False,
         tools: Optional[List[ToolDefinition]] = None,
         tool_config: Optional[ToolConfig] = None,
@@ -95,13 +96,13 @@ class LMStudioClient:
         if tools is None or len(tools) == 0:
             chat = self._convert_message_list_to_lmstudio_chat(messages)
             config = self._get_completion_config_from_params(
-                sampling_params, response_format
+                sampling_params
             )
             if stream:
                 async def stream_generator():
                     # Use asyncio.to_thread to run the synchronous respond_stream method in a separate thread
                     prediction_stream = await asyncio.to_thread(
-                        llm.respond_stream, history=chat, config=config
+                        llm.respond_stream, history=chat, config=config, response_format=json_schema
                     )
 
                     yield ChatCompletionResponseStreamChunk(
@@ -128,7 +129,7 @@ class LMStudioClient:
                 return stream_generator()
             else:
                 response = await asyncio.to_thread(
-                    llm.respond, history=chat, config=config
+                    llm.respond, history=chat, config=config, response_format=json_schema
                 )
                 return self._convert_prediction_to_chat_response(response)
         else:
@@ -137,7 +138,7 @@ class LMStudioClient:
                 model=model_key,
                 messages=messages,
                 sampling_params=sampling_params,
-                response_format=response_format,
+                response_format=json_schema,
                 tools=tools or [],
                 tool_config=tool_config,
                 stream=stream,
@@ -156,11 +157,11 @@ class LMStudioClient:
         llm: lms.LLM,
         content: InterleavedContent,
         sampling_params: Optional[SamplingParams] = None,
-        response_format: Optional[ResponseFormat] = None,
+        json_schema: Optional[JsonSchemaResponseFormat] = None,
         stream: Optional[bool] = False,
     ) -> CompletionMessage:
         config = self._get_completion_config_from_params(
-            sampling_params, response_format
+            sampling_params
         )
         if stream:
             async def stream_generator():
@@ -169,6 +170,7 @@ class LMStudioClient:
                     llm.complete_stream,
                     prompt=interleaved_content_as_str(content),
                     config=config,
+                    response_format=json_schema,
                 )
                 async for chunk in self._async_iterate(prediction_stream):
                     yield CompletionResponseStreamChunk(
@@ -178,7 +180,7 @@ class LMStudioClient:
             return stream_generator()
         else:
             response = await asyncio.to_thread(
-                llm.complete, prompt=interleaved_content_as_str(content), config=config
+                llm.complete, prompt=interleaved_content_as_str(content), config=config, response_format=json_schema
             )
             return CompletionResponse(
                 content=response.content,
@@ -216,7 +218,6 @@ class LMStudioClient:
     def _get_completion_config_from_params(
         self,
         params: Optional[SamplingParams] = None,
-        response_format: Optional[ResponseFormat] = None,
     ) -> lms.LlmPredictionConfigDict:
         options = lms.LlmPredictionConfigDict()
         if params is not None:
@@ -243,20 +244,6 @@ class LMStudioClient:
                     ),
                 }
             )
-        if response_format is not None:
-            if response_format.type == "json_schema":
-                options.update(
-                    {
-                        "structured": {
-                            "type": "json",
-                            "jsonSchema": response_format.json_schema,
-                        }
-                    }
-                )
-            elif response_format.type == "grammar":
-                raise NotImplementedError("Grammar response format is not supported")
-            else:
-                raise ValueError(f"Unsupported response format: {response_format}")
         return options
 
     def _get_stop_reason(self, stop_reason: LlmPredictionStopReason) -> StopReason:
