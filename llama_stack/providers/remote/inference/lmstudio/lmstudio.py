@@ -2,8 +2,11 @@ import lmstudio as lms
 from lmstudio import Chat, LlmPredictionConfigDict, PredictionResult
 from llama_stack.apis.common.content_types import (
     InterleavedContentItem,
+    TextDelta,
 )
 from llama_stack.apis.inference.inference import (
+    ChatCompletionResponseEvent,
+    ChatCompletionResponseEventType,
     ChatCompletionResponseStreamChunk,
     CompletionMessage,
     CompletionResponse,
@@ -166,7 +169,35 @@ class LmstudioInferenceAdapter(Inference, ModelsProtocolPrivate):
             sampling_params, response_format
         )
         if stream:
-            pass
+            async def stream_generator():
+                # Use asyncio.to_thread to run the synchronous respond_stream method in a separate thread
+                prediction_stream = await asyncio.to_thread(
+                    llm.respond_stream, history=chat, config=config
+                )
+
+                yield ChatCompletionResponseStreamChunk(
+                        event=ChatCompletionResponseEvent(
+                            event_type=ChatCompletionResponseEventType.start,
+                            delta=TextDelta(text=""),
+                        )
+                    )
+                # Use the helper method to iterate over the stream asynchronously
+                async for chunk in self._async_iterate(prediction_stream):
+                    yield ChatCompletionResponseStreamChunk(
+                        event=ChatCompletionResponseEvent(
+                            event_type=ChatCompletionResponseEventType.progress,
+                            delta=TextDelta(text=chunk.content),
+                        )
+                    )
+                    yield ChatCompletionResponseStreamChunk(
+                        event=ChatCompletionResponseEvent(
+                            event_type=ChatCompletionResponseEventType.complete,
+                            delta=TextDelta(text=""),
+                        )
+                    )
+            
+            # Return the async generator
+            return stream_generator()
         else:
             response = await asyncio.to_thread(llm.respond, history=chat, config=config)
             return self._convert_prediction_to_chat_response(response)
@@ -224,7 +255,18 @@ class LmstudioInferenceAdapter(Inference, ModelsProtocolPrivate):
             return StopReason.out_of_tokens
         else:
             return StopReason.end_of_turn
-
+    
+    async def _async_iterate(self, iterable):
+        # Get an iterator from the iterable
+        iterator = iter(iterable)
+        
+        # Iterate over the iterator asynchronously
+        while True:
+            try:
+                yield await asyncio.to_thread(next, iterator)
+            except:
+                break
+    
     async def completion(
         self,
         model_id: str,
@@ -247,7 +289,19 @@ class LmstudioInferenceAdapter(Inference, ModelsProtocolPrivate):
             content
         ), "Media content not supported in completion in LM Studio"
         if stream:
-            pass
+            async def stream_generator():
+                # Use asyncio.to_thread to run the synchronous complete_stream method in a separate thread
+                prediction_stream = await asyncio.to_thread(
+                    llm.complete_stream, prompt=interleaved_content_as_str(content), config=config
+                )
+                
+                async for chunk in self._async_iterate(prediction_stream):
+                    yield CompletionResponseStreamChunk(
+                        delta=chunk.content,
+                    )
+            
+            # Return the async generator
+            return stream_generator()
         else:
             response = await asyncio.to_thread(
                 llm.complete, prompt=interleaved_content_as_str(content), config=config
