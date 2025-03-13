@@ -1,14 +1,20 @@
 import lmstudio as lms
-from lmstudio import SyncSessionEmbedding
+from lmstudio import LlmPredictionConfigDict
 from llama_stack.apis.common.content_types import InterleavedContentItem
 from llama_stack.apis.inference.inference import (
     ChatCompletionResponseStreamChunk,
     CompletionResponse,
     CompletionResponseStreamChunk,
 )
+from llama_stack.models.llama.datatypes import (
+    GreedySamplingStrategy,
+    StopReason,
+    TopKSamplingStrategy,
+    TopPSamplingStrategy,
+)
 from llama_stack.providers.datatypes import ModelsProtocolPrivate
 from llama_stack.apis.inference import Inference
-from typing import AsyncGenerator, AsyncIterator, List, Optional, Union
+from typing import AsyncGenerator, AsyncIterator, List, Literal, Optional, Union
 from llama_stack.apis.inference import (
     ChatCompletionRequest,
     ChatCompletionResponse,
@@ -47,6 +53,18 @@ import asyncio
 from llama_stack.log import get_logger
 
 logger = get_logger(name=__name__, category="inference")
+
+
+LlmPredictionStopReason = Literal[
+    "userStopped",
+    "modelUnloaded",
+    "failed",
+    "eosFound",
+    "stopStringFound",
+    "toolCalls",
+    "maxPredictedTokensReached",
+    "contextLengthReached",
+]
 
 
 class LMStudioInferenceAdapter(Inference, ModelsProtocolPrivate):
@@ -88,9 +106,13 @@ class LMStudioInferenceAdapter(Inference, ModelsProtocolPrivate):
             not content_has_media(content) for content in contents
         ), "Media content not supported in embedding model"
         embedding_model = self.model_store.get_model(model_id)
-        model = await asyncio.to_thread(self.client.embedding.model, embedding_model.provider_model_id)
+        model = await asyncio.to_thread(
+            self.client.embedding.model, embedding_model.provider_model_id
+        )
 
-        embeddings = await asyncio.to_thread(model.embed, interleaved_content_as_str(contents))
+        embeddings = await asyncio.to_thread(
+            model.embed, interleaved_content_as_str(contents)
+        )
 
         return EmbeddingsResponse(embeddings=embeddings)
 
@@ -117,6 +139,51 @@ class LMStudioInferenceAdapter(Inference, ModelsProtocolPrivate):
         res = await asyncio.to_thread(llm.respond(text_content))
         return res
 
+    def _get_completion_config_from_params(
+        self,
+        params: Optional[SamplingParams] = None,
+        response_format: Optional[ResponseFormat] = None,
+    ) -> LlmPredictionConfigDict:
+        options = LlmPredictionConfigDict()
+        if params is not None:
+            if isinstance(params.strategy, GreedySamplingStrategy):
+                options.update({"temperature": 0.0})
+            elif isinstance(params.strategy, TopPSamplingStrategy):
+                options.update(
+                    {
+                        "temperature": params.strategy.temperature,
+                        "top_p": params.strategy.top_p,
+                    }
+                )
+            elif isinstance(params.strategy, TopKSamplingStrategy):
+                options.update({"topKSampling": params.strategy.top_k})
+            else:
+                raise ValueError(f"Unsupported sampling strategy: {params.strategy}")
+            options.update(
+                {
+                    "maxTokens": params.max_tokens,
+                    "repetitionPenalty": params.repetition_penalty,
+                }
+            )
+        if response_format is not None:
+            if response_format.type == "json_schema":
+                options.update(
+                    {"structured": {"type": "json", "schema": response_format.schema}}
+                )
+            elif response_format.type == "grammar":
+                raise NotImplementedError("Grammar response format is not supported")
+            else:
+                raise ValueError(f"Unsupported response format: {response_format}")
+        return options
+
+    def _get_stop_reason(self, stop_reason: LlmPredictionStopReason) -> StopReason:
+        if stop_reason == "eosFound":
+            return StopReason.end_of_message
+        elif stop_reason == "maxPredictedTokensReached":
+            return StopReason.out_of_tokens
+        else:
+            return StopReason.end_of_turn
+
     async def completion(
         self,
         model_id: str,
@@ -124,12 +191,23 @@ class LMStudioInferenceAdapter(Inference, ModelsProtocolPrivate):
         sampling_params: Optional[SamplingParams] = None,
         response_format: Optional[ResponseFormat] = None,
         stream: Optional[bool] = False,
-        logprobs: Optional[LogProbConfig] = None,
+        logprobs: Optional[LogProbConfig] = None, # Skip this for now
     ) -> Union[CompletionResponse, AsyncIterator[CompletionResponseStreamChunk]]:
 
-        llm: lms.LLM = await asyncio.to_thread(
-            self.client.llm.load_new_instance(model_id)
+        if sampling_params is None:
+            sampling_params = SamplingParams()
+        model = await self.model_store.get_model(model_id)
+        config = self._get_completion_config_from_params(
+            sampling_params, response_format
         )
-        res = await asyncio.to_thread(llm.respond(content.text))
-        print(res)
-        return res
+        llm = await asyncio.to_thread(self.client.llm.model, model.provider_model_id)
+        if stream:
+            pass
+        else:
+            response = await asyncio.to_thread(
+                llm.complete, interleaved_content_as_str(content), config
+            )
+            return CompletionResponse(
+                content=response.content,
+                stop_reason=self._get_stop_reason(response.stopReason),
+            )
