@@ -144,6 +144,7 @@ class LMStudioClient:
                 stream=stream,
             )
             rest_request = await self._convert_request_to_rest_call(request)
+            print(rest_request)
             if stream:
                 stream = await self.openai_client.chat.completions.create(**rest_request)
                 return convert_openai_chat_completion_stream(stream, enable_incremental_tool_calls=True)
@@ -258,7 +259,7 @@ class LMStudioClient:
         while True:
             try:
                 yield await asyncio.to_thread(next, iterator)
-            except:
+            except StopAsyncIteration:
                 break
 
     async def _convert_request_to_rest_call(

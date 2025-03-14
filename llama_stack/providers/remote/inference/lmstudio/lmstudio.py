@@ -63,7 +63,7 @@ class LMStudioInferenceAdapter(Inference, ModelsProtocolPrivate):
             raise ValueError(
                 f"Model with provider_model_id {model.provider_model_id} not found in LM Studio"
             )
-        self.register_helper.register_model(model)
+        await self.register_helper.register_model(model)
         return model
 
     async def unregister_model(self, model_id):
@@ -77,11 +77,10 @@ class LMStudioInferenceAdapter(Inference, ModelsProtocolPrivate):
         output_dimension: Optional[int] = None,
         task_type: Optional[EmbeddingTaskType] = None,
     ) -> EmbeddingsResponse:
-        model = self.model_store.get_model(model_id)
         assert all(
             not content_has_media(content) for content in contents
         ), "Media content not supported in embedding model"
-        model = self.model_store.get_model(model_id)
+        model = await self.model_store.get_model(model_id)
         embedding_model = await self.client.get_embedding_model(model.provider_model_id)
         embeddings = await self.client.embed(embedding_model, contents)
         return EmbeddingsResponse(embeddings=embeddings)
