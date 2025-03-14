@@ -14,19 +14,47 @@ from llama_stack.providers.utils.inference.model_registry import (
 
 MODEL_ENTRIES = [
     ProviderModelEntry(
-        provider_model_id="lmstudio-community/meta-llama-3.1-8b-instruct",
+        provider_model_id="meta-llama-3-8b-instruct",
+        aliases=[],
+        llama_model=CoreModelId.llama3_8b_instruct,
+        model_type=ModelType.llm,
+    ),
+    ProviderModelEntry(
+        provider_model_id="meta-llama-3-70b-instruct",
+        aliases=[],
+        llama_model=CoreModelId.llama3_70b_instruct,
+        model_type=ModelType.llm,
+    ),
+    ProviderModelEntry(
+        provider_model_id="meta-llama-3.1-8b-instruct",
         aliases=[],
         llama_model=CoreModelId.llama3_1_8b_instruct.value,
         model_type=ModelType.llm,
     ),
     ProviderModelEntry(
-        provider_model_id="lmstudio-community/llama-3.2-3b-instruct",
+        provider_model_id="meta-llama-3.1-70b-instruct",
+        aliases=[],
+        llama_model=CoreModelId.llama3_1_70b_instruct.value,
+        model_type=ModelType.llm,
+    ),
+    ProviderModelEntry(
+        provider_model_id="llama-3.2-1b-instruct",
+        aliases=[],
+        llama_model=CoreModelId.llama3_2_1b_instruct.value,
+        model_type=ModelType.llm,
+    ),
+    ProviderModelEntry(
+        provider_model_id="llama-3.2-3b-instruct",
         aliases=[],
         llama_model=CoreModelId.llama3_2_3b_instruct.value,
         model_type=ModelType.llm,
     ),
-    # TODO add more models
-
+    ProviderModelEntry(
+        provider_model_id="llama-3.2-70b-instruct",
+        aliases=[],
+        llama_model=CoreModelId.llama3_3_70b_instruct.value,
+        model_type=ModelType.llm,
+    ),
     # embedding model
     ProviderModelEntry(
         provider_model_id="text-embedding-nomic-embed-text-v1.5",
@@ -36,5 +64,5 @@ MODEL_ENTRIES = [
             "embedding_dimension": 768,
             "context_length": 2048,
         },
-    )
+    ),
 ]
