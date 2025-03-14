@@ -100,21 +100,21 @@ metadata_store:
   db_path: ${env.SQLITE_STORE_DIR:~/.llama/distributions/lmstudio}/registry.db
 models:
 - metadata: {}
-  model_id: lmstudio-community/meta-llama-3.1-8b-instruct
+  model_id: meta-llama-3.1-8b-instruct
   provider_id: lmstudio
-  provider_model_id: lmstudio-community/meta-llama-3.1-8b-instruct
+  provider_model_id: meta-llama-3.1-8b-instruct
   model_type: llm
 - metadata: {}
-  model_id: lmstudio-community/llama-3.2-3b-instruct
+  model_id: llama-3.2-3b-instruct
   provider_id: lmstudio
-  provider_model_id: lmstudio-community/llama-3.2-3b-instruct
+  provider_model_id: llama-3.2-3b-instruct
   model_type: llm
 - metadata:
     embedding_dimension: 768
     context_length: 2048
   model_id: text-embedding-nomic-embed-text-v1.5
   provider_id: lmstudio
-  provider_model_id: text-embedding-nomic-embed-text-v1.5
+  provider_model_id: nomic-embed-text-v1.5
   model_type: embedding
 shields: []
 vector_dbs: []

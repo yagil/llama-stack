@@ -57,7 +57,6 @@ class LMStudioClient:
     async def check_if_model_present_in_lmstudio(self, provider_model_id):
         models = await asyncio.to_thread(self.sdk_client.list_downloaded_models)
         model_ids = [m.model_key for m in models]
-        model_ids = [m.model_key for m in models]
         if provider_model_id in model_ids:
             return True
 
