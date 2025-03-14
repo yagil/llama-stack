@@ -1,5 +1,5 @@
 import asyncio
-from typing import List, Literal, Optional
+from typing import AsyncIterator, List, Literal, Optional, Union
 import lmstudio as lms
 
 from llama_stack.apis.common.content_types import InterleavedContent, TextDelta
@@ -92,7 +92,9 @@ class LMStudioClient:
         stream: Optional[bool] = False,
         tools: Optional[List[ToolDefinition]] = None,
         tool_config: Optional[ToolConfig] = None,
-    ) -> ChatCompletionResponse:
+    ) -> Union[
+        ChatCompletionResponse, AsyncIterator[ChatCompletionResponseStreamChunk]
+    ]:
         if tools is None or len(tools) == 0:
             chat = self._convert_message_list_to_lmstudio_chat(messages)
             config = self._get_completion_config_from_params(
