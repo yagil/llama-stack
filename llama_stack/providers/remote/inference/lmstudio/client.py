@@ -171,7 +171,7 @@ class LMStudioClient:
         sampling_params: Optional[SamplingParams] = None,
         json_schema: Optional[JsonSchemaResponseFormat] = None,
         stream: Optional[bool] = False,
-    ) -> CompletionMessage | AsyncGenerator[CompletionResponseStreamChunk]:
+    ) -> Union[CompletionMessage, AsyncIterator[CompletionResponseStreamChunk]]:
         config = self._get_completion_config_from_params(sampling_params)
         if stream:
 
