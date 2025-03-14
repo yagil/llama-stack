@@ -132,10 +132,8 @@ class LMStudioInferenceAdapter(Inference, ModelsProtocolPrivate):
             sampling_params = SamplingParams()
         model = await self.model_store.get_model(model_id)
         llm = await self.client.get_llm(model.provider_model_id)
-        # TODO: See if we can support this
-        assert not content_has_media(
-            content
-        ), "Media content not supported in completion in LM Studio"
+        if content_has_media(content):
+            raise NotImplementedError("Media content not supported in LM Studio")
 
         if response_format is not None and response_format.type != ResponseFormatType.json_schema.value:
             raise ValueError(

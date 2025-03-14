@@ -1,5 +1,5 @@
 import asyncio
-from typing import List, Literal, Optional
+from typing import AsyncGenerator, List, Literal, Optional
 import lmstudio as lms
 
 from llama_stack.apis.common.content_types import InterleavedContent, TextDelta
@@ -14,7 +14,6 @@ from llama_stack.apis.inference.inference import (
     CompletionResponseStreamChunk,
     JsonSchemaResponseFormat,
     Message,
-    ResponseFormat,
     ToolConfig,
     ToolDefinition,
 )
@@ -53,7 +52,7 @@ class LMStudioClient:
     def __init__(self, url: str) -> None:
         self.url = url
         self.sdk_client = lms.Client(self.url)
-        self.openai_client = OpenAI(base_url=f'http://{url}/v1', api_key="garbagez")
+        self.openai_client = OpenAI(base_url=f"http://{url}/v1", api_key="lmstudio")
 
     async def check_if_model_present_in_lmstudio(self, provider_model_id):
         models = await asyncio.to_thread(self.sdk_client.list_downloaded_models)
@@ -92,17 +91,19 @@ class LMStudioClient:
         stream: Optional[bool] = False,
         tools: Optional[List[ToolDefinition]] = None,
         tool_config: Optional[ToolConfig] = None,
-    ) -> ChatCompletionResponse:
+    ) -> ChatCompletionResponse | AsyncGenerator[ChatCompletionResponseStreamChunk]:
         if tools is None or len(tools) == 0:
             chat = self._convert_message_list_to_lmstudio_chat(messages)
-            config = self._get_completion_config_from_params(
-                sampling_params
-            )
+            config = self._get_completion_config_from_params(sampling_params)
             if stream:
+
                 async def stream_generator():
                     # Use asyncio.to_thread to run the synchronous respond_stream method in a separate thread
                     prediction_stream = await asyncio.to_thread(
-                        llm.respond_stream, history=chat, config=config, response_format=json_schema
+                        llm.respond_stream,
+                        history=chat,
+                        config=config,
+                        response_format=json_schema,
                     )
 
                     yield ChatCompletionResponseStreamChunk(
@@ -125,11 +126,15 @@ class LMStudioClient:
                                 delta=TextDelta(text=""),
                             )
                         )
+
                 # Return the async generator
                 return stream_generator()
             else:
                 response = await asyncio.to_thread(
-                    llm.respond, history=chat, config=config, response_format=json_schema
+                    llm.respond,
+                    history=chat,
+                    config=config,
+                    response_format=json_schema,
                 )
                 return self._convert_prediction_to_chat_response(response)
         else:
@@ -146,11 +151,12 @@ class LMStudioClient:
             rest_request = await self._convert_request_to_rest_call(request)
             print(rest_request)
             if stream:
-                async def stream_generator():
-                    stream = await self.openai_client.chat.completions.create(**rest_request)
-                    async for chunk in convert_openai_chat_completion_stream(stream, enable_incremental_tool_calls=False):
-                        yield chunk
-                return stream_generator()
+                stream = await self.openai_client.chat.completions.create(
+                    **rest_request
+                )
+                return convert_openai_chat_completion_stream(
+                    stream, enable_incremental_tool_calls=False
+                )
             response = await self.openai_client.chat.completions.create(**rest_request)
             if response:
                 result = convert_openai_chat_completion_choice(response.choices[0])
@@ -163,11 +169,10 @@ class LMStudioClient:
         sampling_params: Optional[SamplingParams] = None,
         json_schema: Optional[JsonSchemaResponseFormat] = None,
         stream: Optional[bool] = False,
-    ) -> CompletionMessage:
-        config = self._get_completion_config_from_params(
-            sampling_params
-        )
+    ) -> CompletionMessage | AsyncGenerator[CompletionResponseStreamChunk]:
+        config = self._get_completion_config_from_params(sampling_params)
         if stream:
+
             async def stream_generator():
                 # Use asyncio.to_thread to run the synchronous complete_stream method in a separate thread
                 prediction_stream = await asyncio.to_thread(
@@ -180,11 +185,15 @@ class LMStudioClient:
                     yield CompletionResponseStreamChunk(
                         delta=chunk.content,
                     )
+
             # Return the async generator
             return stream_generator()
         else:
             response = await asyncio.to_thread(
-                llm.complete, prompt=interleaved_content_as_str(content), config=config, response_format=json_schema
+                llm.complete,
+                prompt=interleaved_content_as_str(content),
+                config=config,
+                response_format=json_schema,
             )
             return CompletionResponse(
                 content=response.content,
@@ -197,8 +206,9 @@ class LMStudioClient:
         chat = lms.Chat()
         for message in messages:
             if content_has_media(message.content):
-                # TODO: Support images and other media
-                continue
+                raise NotImplementedError(
+                    "Media content is not supported in LMStudio messages"
+                )
             if message.role == "user":
                 chat.add_user_message(interleaved_content_as_str(message.content))
             elif message.role == "system":
@@ -257,6 +267,7 @@ class LMStudioClient:
             return StopReason.out_of_tokens
         else:
             return StopReason.end_of_turn
+
     async def _async_iterate(self, iterable):
         iterator = iter(iterable)
         while True:
@@ -282,14 +293,16 @@ class LMStudioClient:
             compatible_request["tools"] = [
                 convert_tooldef_to_openai_tool(tool) for tool in request.tools
             ]
-        compatible_request['logprobs'] = False
-        compatible_request['stream'] = request.stream
-        compatible_request['extra_headers'] = {
+        compatible_request["logprobs"] = False
+        compatible_request["stream"] = request.stream
+        compatible_request["extra_headers"] = {
             b"User-Agent": b"llama-stack: lmstudio-inference-adapter"
         }
         return compatible_request
-    
-    def _convert_sampling_params(self, sampling_params: SamplingParams, legacy: bool = False) -> dict:
+
+    def _convert_sampling_params(
+        self, sampling_params: SamplingParams, legacy: bool = False
+    ) -> dict:
         params = {}
 
         if sampling_params:
