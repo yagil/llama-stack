@@ -65,4 +65,13 @@ MODEL_ENTRIES = [
             "context_length": 2048,
         },
     ),
+    ProviderModelEntry(
+        model_id="all-MiniLM-L6-v2",
+        provider_model_id="text-embedding-all-minilm-l6-v2",
+        provider_id="lmstudio",
+        model_type=ModelType.embedding,
+        metadata={
+            "embedding_dimension": 384,
+        },
+    ),
 ]

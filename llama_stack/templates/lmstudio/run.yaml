@@ -116,6 +116,12 @@ models:
   provider_id: lmstudio
   provider_model_id: nomic-embed-text-v1.5
   model_type: embedding
+- metadata:
+    embedding_dimension: 384
+  model_id: all-MiniLM-L6-v2
+  provider_id: lmstudio
+  provider_model_id: text-embedding-all-minilm-l6-v2
+  model_type: embedding
 shields: []
 vector_dbs: []
 datasets: []
