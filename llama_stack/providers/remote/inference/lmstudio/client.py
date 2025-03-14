@@ -1,5 +1,5 @@
 import asyncio
-from typing import AsyncIterator, List, Literal, Optional, Union
+from typing import AsyncIterator, AsyncGenerator, List, Literal, Optional, Union
 import lmstudio as lms
 
 from llama_stack.apis.common.content_types import InterleavedContent, TextDelta
