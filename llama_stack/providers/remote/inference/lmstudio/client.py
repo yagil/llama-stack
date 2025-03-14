@@ -145,8 +145,11 @@ class LMStudioClient:
             )
             rest_request = await self._convert_request_to_rest_call(request)
             if stream:
-                stream = await self.openai_client.chat.completions.create(**rest_request)
-                return convert_openai_chat_completion_stream(stream, enable_incremental_tool_calls=True)
+                async def stream_generator():
+                    stream = await self.openai_client.chat.completions.create(**rest_request)
+                    async for chunk in convert_openai_chat_completion_stream(stream, enable_incremental_tool_calls=False):
+                        yield chunk
+                return stream_generator()
             response = await self.openai_client.chat.completions.create(**rest_request)
             if response:
                 result = convert_openai_chat_completion_choice(response.choices[0])
