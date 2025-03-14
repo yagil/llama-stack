@@ -39,6 +39,6 @@
 ## Agents
 | API | Capability | Test | Status |
 |:-----|:-----|:-----|:-----|
-| /create_agent_turn | rag | test_rag_agent | ✅ |
-| /create_agent_turn | custom_tool | test_custom_tool | ❌ |
-| /create_agent_turn | code_execution | test_code_interpreter_for_attachments | ✅ |
+| /create_agent_turn | rag | test_rag_agent | ❓ |
+| /create_agent_turn | custom_tool | test_custom_tool | ❓ |
+| /create_agent_turn | code_execution | test_code_interpreter_for_attachments | ❓ |
