@@ -6,10 +6,9 @@
 
 from pathlib import Path
 
-from llama_stack.apis.models.models import ModelType
-from llama_stack.distribution.datatypes import ModelInput, Provider, ToolGroupInput
+from llama_stack.distribution.datatypes import Provider, ToolGroupInput
 from llama_stack.providers.inline.vector_io.faiss.config import FaissVectorIOConfig
-from llama_stack.providers.remote.inference.lmstudio import LmstudioImplConfig
+from llama_stack.providers.remote.inference.lmstudio import LMStudioImplConfig
 from llama_stack.providers.remote.inference.lmstudio.models import MODEL_ENTRIES
 from llama_stack.templates.template import DistributionTemplate, RunConfigSettings, get_model_registry
 
@@ -36,7 +35,7 @@ def get_distribution_template() -> DistributionTemplate:
     lmstudio_provider = Provider(
         provider_id="lmstudio",
         provider_type="remote::lmstudio",
-        config=LmstudioImplConfig.sample_run_config(),
+        config=LMStudioImplConfig.sample_run_config(),
     )
 
     available_models = {

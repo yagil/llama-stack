@@ -47,6 +47,9 @@ LlmPredictionStopReason = Literal[
     "contextLengthReached",
 ]
 
+# _client.py
+# Install and run precommit hooks
+
 
 class LMStudioClient:
     def __init__(self, url: str) -> None:
@@ -72,7 +75,7 @@ class LMStudioClient:
         return model
 
     async def embed(
-        self, embedding_model: lms.EmbeddingModel, contents: List[str] | List
+        self, embedding_model: lms.EmbeddingModel, contents: Union[str, List[str]]
     ):
         embeddings = await asyncio.to_thread(embedding_model.embed, contents)
         return embeddings
@@ -80,6 +83,93 @@ class LMStudioClient:
     async def get_llm(self, provider_model_id: str) -> lms.LLM:
         model = await asyncio.to_thread(self.sdk_client.llm.model, provider_model_id)
         return model
+
+    async def _llm_respond_non_tools(
+        self,
+        llm: lms.LLM,
+        messages: List[Message],
+        sampling_params: Optional[SamplingParams] = None,
+        json_schema: Optional[JsonSchemaResponseFormat] = None,
+        stream: Optional[bool] = False,
+    ) -> Union[
+        ChatCompletionResponse, AsyncIterator[ChatCompletionResponseStreamChunk]
+    ]:
+        chat = self._convert_message_list_to_lmstudio_chat(messages)
+        config = self._get_completion_config_from_params(sampling_params)
+        if stream:
+
+            async def stream_generator():
+                prediction_stream = await asyncio.to_thread(
+                    llm.respond_stream,
+                    history=chat,
+                    config=config,
+                    response_format=json_schema,
+                )
+
+                yield ChatCompletionResponseStreamChunk(
+                    event=ChatCompletionResponseEvent(
+                        event_type=ChatCompletionResponseEventType.start,
+                        delta=TextDelta(text=""),
+                    )
+                )
+                async for chunk in self._async_iterate(prediction_stream):
+                    yield ChatCompletionResponseStreamChunk(
+                        event=ChatCompletionResponseEvent(
+                            event_type=ChatCompletionResponseEventType.progress,
+                            delta=TextDelta(text=chunk.content),
+                        )
+                    )
+                    yield ChatCompletionResponseStreamChunk(
+                        event=ChatCompletionResponseEvent(
+                            event_type=ChatCompletionResponseEventType.complete,
+                            delta=TextDelta(text=""),
+                        )
+                    )
+
+            return stream_generator()
+        else:
+            response = await asyncio.to_thread(
+                llm.respond,
+                history=chat,
+                config=config,
+                response_format=json_schema,
+            )
+            return self._convert_prediction_to_chat_response(response)
+
+    async def _llm_respond_with_tools(
+        self,
+        llm: lms.LLM,
+        messages: List[Message],
+        sampling_params: Optional[SamplingParams] = None,
+        json_schema: Optional[JsonSchemaResponseFormat] = None,
+        stream: Optional[bool] = False,
+        tools: Optional[List[ToolDefinition]] = None,
+        tool_config: Optional[ToolConfig] = None,
+    ) -> Union[
+        ChatCompletionResponse, AsyncIterator[ChatCompletionResponseStreamChunk]
+    ]:
+        model_key = llm.get_info().model_key
+        request = ChatCompletionRequest(
+            model=model_key,
+            messages=messages,
+            sampling_params=sampling_params,
+            response_format=json_schema,
+            tools=tools,
+            tool_config=tool_config,
+            stream=stream,
+        )
+        rest_request = await self._convert_request_to_rest_call(request)
+        if stream:
+            stream = await self.openai_client.chat.completions.create(**rest_request)
+            return convert_openai_chat_completion_stream(
+                stream, enable_incremental_tool_calls=True
+            )
+        response = await self.openai_client.chat.completions.create(**rest_request)
+        if response:
+            result = convert_openai_chat_completion_choice(response.choices[0])
+            return result
+        else:
+            return None
 
     async def llm_respond(
         self,
@@ -94,74 +184,23 @@ class LMStudioClient:
         ChatCompletionResponse, AsyncIterator[ChatCompletionResponseStreamChunk]
     ]:
         if tools is None or len(tools) == 0:
-            chat = self._convert_message_list_to_lmstudio_chat(messages)
-            config = self._get_completion_config_from_params(sampling_params)
-            if stream:
-
-                async def stream_generator():
-                    # Use asyncio.to_thread to run the synchronous respond_stream method in a separate thread
-                    prediction_stream = await asyncio.to_thread(
-                        llm.respond_stream,
-                        history=chat,
-                        config=config,
-                        response_format=json_schema,
-                    )
-
-                    yield ChatCompletionResponseStreamChunk(
-                        event=ChatCompletionResponseEvent(
-                            event_type=ChatCompletionResponseEventType.start,
-                            delta=TextDelta(text=""),
-                        )
-                    )
-                    # Use the helper method to iterate over the stream asynchronously
-                    async for chunk in self._async_iterate(prediction_stream):
-                        yield ChatCompletionResponseStreamChunk(
-                            event=ChatCompletionResponseEvent(
-                                event_type=ChatCompletionResponseEventType.progress,
-                                delta=TextDelta(text=chunk.content),
-                            )
-                        )
-                        yield ChatCompletionResponseStreamChunk(
-                            event=ChatCompletionResponseEvent(
-                                event_type=ChatCompletionResponseEventType.complete,
-                                delta=TextDelta(text=""),
-                            )
-                        )
-
-                # Return the async generator
-                return stream_generator()
-            else:
-                response = await asyncio.to_thread(
-                    llm.respond,
-                    history=chat,
-                    config=config,
-                    response_format=json_schema,
-                )
-                return self._convert_prediction_to_chat_response(response)
-        else:
-            model_key = llm.get_info().model_key
-            request = ChatCompletionRequest(
-                model=model_key,
+            return await self._llm_respond_non_tools(
+                llm=llm,
                 messages=messages,
                 sampling_params=sampling_params,
-                response_format=json_schema,
-                tools=tools or [],
-                tool_config=tool_config,
+                json_schema=json_schema,
                 stream=stream,
             )
-            rest_request = await self._convert_request_to_rest_call(request)
-            print(rest_request)
-            if stream:
-                stream = await self.openai_client.chat.completions.create(
-                    **rest_request
-                )
-                return convert_openai_chat_completion_stream(
-                    stream, enable_incremental_tool_calls=True
-                )
-            response = await self.openai_client.chat.completions.create(**rest_request)
-            if response:
-                result = convert_openai_chat_completion_choice(response.choices[0])
-                return result
+        else:
+            return await self._llm_respond_with_tools(
+                llm=llm,
+                messages=messages,
+                sampling_params=sampling_params,
+                json_schema=json_schema,
+                stream=stream,
+                tools=tools,
+                tool_config=tool_config,
+            )
 
     async def llm_completion(
         self,
@@ -170,12 +209,11 @@ class LMStudioClient:
         sampling_params: Optional[SamplingParams] = None,
         json_schema: Optional[JsonSchemaResponseFormat] = None,
         stream: Optional[bool] = False,
-    ) -> Union[CompletionMessage, AsyncIterator[CompletionResponseStreamChunk]]:
+    ) -> Union[CompletionResponse, AsyncIterator[CompletionResponseStreamChunk]]:
         config = self._get_completion_config_from_params(sampling_params)
         if stream:
 
             async def stream_generator():
-                # Use asyncio.to_thread to run the synchronous complete_stream method in a separate thread
                 prediction_stream = await asyncio.to_thread(
                     llm.complete_stream,
                     prompt=interleaved_content_as_str(content),
@@ -187,7 +225,6 @@ class LMStudioClient:
                         delta=chunk.content,
                     )
 
-            # Return the async generator
             return stream_generator()
         else:
             response = await asyncio.to_thread(
@@ -214,8 +251,10 @@ class LMStudioClient:
                 chat.add_user_message(interleaved_content_as_str(message.content))
             elif message.role == "system":
                 chat.add_system_prompt(interleaved_content_as_str(message.content))
-            else:
+            elif message.role == "assistant":
                 chat.add_assistant_response(interleaved_content_as_str(message.content))
+            else:
+                raise ValueError(f"Unsupported message role: {message.role}")
         return chat
 
     def _convert_prediction_to_chat_response(
@@ -235,33 +274,35 @@ class LMStudioClient:
         params: Optional[SamplingParams] = None,
     ) -> lms.LlmPredictionConfigDict:
         options = lms.LlmPredictionConfigDict()
-        if params is not None:
-            if isinstance(params.strategy, GreedySamplingStrategy):
-                options.update({"temperature": 0.0})
-            elif isinstance(params.strategy, TopPSamplingStrategy):
-                options.update(
-                    {
-                        "temperature": params.strategy.temperature,
-                        "top_p": params.strategy.top_p,
-                    }
-                )
-            elif isinstance(params.strategy, TopKSamplingStrategy):
-                options.update({"topKSampling": params.strategy.top_k})
-            else:
-                raise ValueError(f"Unsupported sampling strategy: {params.strategy}")
+        if params is None:
+            return options
+        if isinstance(params.strategy, GreedySamplingStrategy):
+            options.update({"temperature": 0.0})
+        elif isinstance(params.strategy, TopPSamplingStrategy):
             options.update(
                 {
-                    "maxTokens": params.max_tokens if params.max_tokens != 0 else None,
-                    "repetitionPenalty": (
-                        params.repetition_penalty
-                        if params.repetition_penalty != 0
-                        else None
-                    ),
+                    "temperature": params.strategy.temperature,
+                    "top_p": params.strategy.top_p,
                 }
             )
+        elif isinstance(params.strategy, TopKSamplingStrategy):
+            options.update({"topKSampling": params.strategy.top_k})
+        else:
+            raise ValueError(f"Unsupported sampling strategy: {params.strategy}")
+        options.update(
+            {
+                "maxTokens": params.max_tokens if params.max_tokens != 0 else None,
+                "repetitionPenalty": (
+                    params.repetition_penalty
+                    if params.repetition_penalty != 0
+                    else None
+                ),
+            }
+        )
         return options
 
     def _get_stop_reason(self, stop_reason: LlmPredictionStopReason) -> StopReason:
+        # TODO: Check this if it is correct
         if stop_reason == "eosFound":
             return StopReason.end_of_message
         elif stop_reason == "maxPredictedTokensReached":
@@ -290,7 +331,7 @@ class LMStudioClient:
                 "type": "json_schema",
                 "json_schema": request.response_format.json_schema,
             }
-        if request.tools:
+        if request.tools is not None:
             compatible_request["tools"] = [
                 convert_tooldef_to_openai_tool(tool) for tool in request.tools
             ]
@@ -301,25 +342,21 @@ class LMStudioClient:
         }
         return compatible_request
 
-    def _convert_sampling_params(
-        self, sampling_params: SamplingParams, legacy: bool = False
-    ) -> dict:
+    def _convert_sampling_params(self, sampling_params: Optional[SamplingParams]) -> dict:
         params = {}
 
-        if sampling_params:
-            params["frequency_penalty"] = sampling_params.repetition_penalty
+        if sampling_params is None:
+            return params
+        params["frequency_penalty"] = sampling_params.repetition_penalty
 
-            if sampling_params.max_tokens:
-                if legacy:
-                    params["max_tokens"] = sampling_params.max_tokens
-                else:
-                    params["max_completion_tokens"] = sampling_params.max_tokens
+        if sampling_params.max_tokens:
+            params["max_completion_tokens"] = sampling_params.max_tokens
 
-            if isinstance(sampling_params.strategy, TopPSamplingStrategy):
-                params["top_p"] = sampling_params.strategy.top_p
-            if isinstance(sampling_params.strategy, TopKSamplingStrategy):
-                params["extra_body"]["top_k"] = sampling_params.strategy.top_k
-            if isinstance(sampling_params.strategy, GreedySamplingStrategy):
-                params["temperature"] = 0.0
+        if isinstance(sampling_params.strategy, TopPSamplingStrategy):
+            params["top_p"] = sampling_params.strategy.top_p
+        if isinstance(sampling_params.strategy, TopKSamplingStrategy):
+            params["extra_body"]["top_k"] = sampling_params.strategy.top_k
+        if isinstance(sampling_params.strategy, GreedySamplingStrategy):
+            params["temperature"] = 0.0
 
         return params

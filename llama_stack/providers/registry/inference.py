@@ -255,7 +255,7 @@ def available_providers() -> List[ProviderSpec]:
                 adapter_type="lmstudio",
                 pip_packages=["lmstudio"],
                 module="llama_stack.providers.remote.inference.lmstudio",
-                config_class="llama_stack.providers.remote.inference.lmstudio.LmstudioImplConfig",
+                config_class="llama_stack.providers.remote.inference.lmstudio.LMStudioImplConfig",
             ),
         ),
     ]
