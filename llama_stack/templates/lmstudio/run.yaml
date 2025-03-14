@@ -100,27 +100,52 @@ metadata_store:
   db_path: ${env.SQLITE_STORE_DIR:~/.llama/distributions/lmstudio}/registry.db
 models:
 - metadata: {}
+  model_id: meta-llama-3-8b-instruct
+  provider_id: lmstudio
+  provider_model_id: meta-llama-3-8b-instruct
+  model_type: llm
+- metadata: {}
+  model_id: meta-llama-3-70b-instruct
+  provider_id: lmstudio
+  provider_model_id: meta-llama-3-70b-instruct
+  model_type: llm
+- metadata: {}
   model_id: meta-llama-3.1-8b-instruct
   provider_id: lmstudio
   provider_model_id: meta-llama-3.1-8b-instruct
+  model_type: llm
+- metadata: {}
+  model_id: meta-llama-3.1-70b-instruct
+  provider_id: lmstudio
+  provider_model_id: meta-llama-3.1-70b-instruct
+  model_type: llm
+- metadata: {}
+  model_id: llama-3.2-1b-instruct
+  provider_id: lmstudio
+  provider_model_id: llama-3.2-1b-instruct
   model_type: llm
 - metadata: {}
   model_id: llama-3.2-3b-instruct
   provider_id: lmstudio
   provider_model_id: llama-3.2-3b-instruct
   model_type: llm
+- metadata: {}
+  model_id: llama-3.2-70b-instruct
+  provider_id: lmstudio
+  provider_model_id: llama-3.2-70b-instruct
+  model_type: llm
 - metadata:
     embedding_dimension: 768
     context_length: 2048
-  model_id: text-embedding-nomic-embed-text-v1.5
+  model_id: nomic-embed-text-v1.5
   provider_id: lmstudio
   provider_model_id: nomic-embed-text-v1.5
   model_type: embedding
 - metadata:
     embedding_dimension: 384
-  model_id: all-MiniLM-L6-v2
+  model_id: all-minilm-l6-v2
   provider_id: lmstudio
-  provider_model_id: text-embedding-all-minilm-l6-v2
+  provider_model_id: all-minilm-l6-v2
   model_type: embedding
 shields: []
 vector_dbs: []

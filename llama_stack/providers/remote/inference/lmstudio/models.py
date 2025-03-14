@@ -67,7 +67,7 @@ MODEL_ENTRIES = [
     ),
     ProviderModelEntry(
         model_id="all-MiniLM-L6-v2",
-        provider_model_id="text-embedding-all-minilm-l6-v2",
+        provider_model_id="all-minilm-l6-v2",
         provider_id="lmstudio",
         model_type=ModelType.embedding,
         metadata={
