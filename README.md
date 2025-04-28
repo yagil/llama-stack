@@ -119,6 +119,8 @@ Here is a list of the various API providers and available distributions that can
 |          OpenAI          |         Hosted         |            |       ✅       |            |            |               |
 |        Anthropic         |         Hosted         |            |       ✅       |            |            |               |
 |          Gemini          |         Hosted         |            |       ✅       |            |            |               |
+|          watsonx         |         Hosted         |            |       ✅       |            |            |               |
+|          LM Studio       |      Single Node       |            |       ✅       |            |            |               |
 
 
 ### Distributions
